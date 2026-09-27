@@ -78,15 +78,17 @@ export default function Dashboard({ portfolio, prices: initialPrices, history: i
   useEffect(() => {
     let active = true;
     const refresh = async () => {
-      const bucket = Math.floor(Date.now() / 300000);
-      const root = 'https://raw.githubusercontent.com/mythical-crypto/Tracker/main/data/';
-      const results = await Promise.allSettled([
-        fetch(`${root}prices.json?refresh=${bucket}`, { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error('Нет снимка цен'); return response.json(); }),
-        fetch(`${root}history.json?refresh=${bucket}`, { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error('Нет истории цен'); return response.json(); }),
-      ]);
-      if (!active) return;
-      if (results[0].status === 'fulfilled' && results[0].value?.source === 'Steam Community Market' && results[0].value?.currency === 'RUB') setPrices(results[0].value);
-      if (results[1].status === 'fulfilled' && Array.isArray(results[1].value?.snapshots)) setHistory(results[1].value);
+      try {
+        const response = await fetch('https://api.github.com/repos/mythical-crypto/Tracker/contents/data/live.json?ref=main', { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } });
+        if (!response.ok) return;
+        const file = await response.json();
+        if (file.encoding !== 'base64' || !file.content) return;
+        const bytes = Uint8Array.from(atob(file.content.replace(/\s/g, '')), (char) => char.charCodeAt(0));
+        const current = JSON.parse(new TextDecoder().decode(bytes));
+        if (!active || current.prices?.source !== 'Steam Community Market' || current.prices?.currency !== 'RUB' || !Array.isArray(current.history?.snapshots)) return;
+        setPrices(current.prices);
+        setHistory(current.history);
+      } catch { /* Встроенный снимок остаётся доступен при сбое GitHub */ }
     };
     void refresh();
     const interval = setInterval(() => { void refresh(); }, 300000);

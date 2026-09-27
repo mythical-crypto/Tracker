@@ -24,6 +24,7 @@ test('FIFO учитывает продажу и оставшуюся себес�
 test('импорт содержит все операции и Steam-цены для открытых позиций', () => {
   const portfolio = JSON.parse(readFileSync(new URL('../data/portfolio.json', import.meta.url)));
   const prices = JSON.parse(readFileSync(new URL('../data/prices.json', import.meta.url)));
+  const live = JSON.parse(readFileSync(new URL('../data/live.json', import.meta.url)));
   const items = [...portfolio.items, ...portfolio.closedItems];
   assert.equal(items.reduce((sum, item) => sum + item.trades.length, 0), 110);
   assert.equal(portfolio.items.length, 48);
@@ -31,4 +32,6 @@ test('импорт содержит все операции и Steam-цены д
   assert.ok(portfolio.items.every((item) => item.quantity > 0 && item.costKopecks > 0 && prices.items[item.name]?.priceKopecks > 0));
   assert.equal(prices.source, 'Steam Community Market');
   assert.equal(prices.currency, 'RUB');
+  assert.deepEqual(live.prices, prices);
+  assert.ok(live.history.snapshots.length >= 1);
 });

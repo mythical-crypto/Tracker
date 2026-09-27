@@ -97,5 +97,6 @@ const costKopecks = portfolio.items.reduce((sum, item) => sum + item.costKopecks
 if (!iconsOnly && successful > 0) history.snapshots.push({ at: now, valueKopecks, costKopecks, freshCount: successful, totalCount: portfolio.items.length });
 writeFileSync('data/prices.json', JSON.stringify(prices, null, 2) + '\n');
 writeFileSync('data/history.json', JSON.stringify(history, null, 2) + '\n');
+writeFileSync('data/live.json', JSON.stringify({ prices, history }, null, 2) + '\n');
 process.stdout.write(iconsOnly ? `Изображения Steam: ${Object.values(prices.items).filter((item) => item.icon).length}/${portfolio.items.length}\n` : `Обновлено ${successful}/${portfolio.items.length}; ошибок ${errors}\n`);
 if (!iconsOnly && successful === 0) process.exitCode = 1;
