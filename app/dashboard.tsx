@@ -76,6 +76,7 @@ export default function Dashboard({ portfolio, prices: initialPrices, history: i
       const savedPrefs = localStorage.getItem('tracker.preferences.v1');
       const savedOptions = localStorage.getItem('tracker.item-options.v1');
       if (savedPrefs) setPrefs({ ...defaultPreferences, ...JSON.parse(savedPrefs) });
+      else if (window.matchMedia('(max-width: 570px)').matches) setPrefs({ ...defaultPreferences, view: 'grid' });
       if (savedOptions) setItemOptions(JSON.parse(savedOptions));
     } catch { /* local storage may be unavailable */ }
     setReady(true);
