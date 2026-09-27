@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { retainSnapshots } from './history.mjs';
 
 const portfolio = JSON.parse(readFileSync('data/portfolio.json', 'utf8'));
 const previous = JSON.parse(readFileSync('data/prices.json', 'utf8'));
@@ -94,9 +95,16 @@ if (!iconsOnly) {
 }
 const valueKopecks = portfolio.items.reduce((sum, item) => sum + item.quantity * (prices.items[item.name]?.priceKopecks || 0), 0);
 const costKopecks = portfolio.items.reduce((sum, item) => sum + item.costKopecks, 0);
-if (!iconsOnly && successful > 0) history.snapshots.push({ at: now, valueKopecks, costKopecks, freshCount: successful, totalCount: portfolio.items.length });
+if (!iconsOnly && successful > 0) {
+  const itemPrices = Object.fromEntries(portfolio.items.flatMap((item) => {
+    const price = prices.items[item.name]?.priceKopecks;
+    return typeof price === 'number' ? [[item.name, price]] : [];
+  }));
+  history.snapshots.push({ at: now, valueKopecks, costKopecks, freshCount: successful, totalCount: portfolio.items.length, itemPrices });
+  history.snapshots = retainSnapshots(history.snapshots, Date.parse(now));
+}
 writeFileSync('data/prices.json', JSON.stringify(prices, null, 2) + '\n');
 writeFileSync('data/history.json', JSON.stringify(history, null, 2) + '\n');
-writeFileSync('data/live.json', JSON.stringify({ prices, history }, null, 2) + '\n');
+writeFileSync('data/live.json', JSON.stringify({ prices, history }) + '\n');
 process.stdout.write(iconsOnly ? `Изображения Steam: ${Object.values(prices.items).filter((item) => item.icon).length}/${portfolio.items.length}\n` : `Обновлено ${successful}/${portfolio.items.length}; ошибок ${errors}\n`);
 if (!iconsOnly && successful === 0) process.exitCode = 1;
