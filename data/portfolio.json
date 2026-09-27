@@ -1,0 +1,1668 @@
+{
+  "currency": "RUB",
+  "costMethod": "FIFO",
+  "importedAt": "2026-09-27T17:23:12.537Z",
+  "sourceFiles": [
+    "stikery-arma.csv",
+    "breloki-6.csv",
+    "case-486.csv",
+    "kapsuly-23.csv",
+    "kopen-2.csv",
+    "parizh-3.csv",
+    "shankhay-4.csv"
+  ],
+  "items": [
+    {
+      "name": "Charm | Baby's AK",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Baby's AK",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 5209,
+          "totalKopecks": 130225,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Baby's AK",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 1892,
+          "totalKopecks": 47300,
+          "feeKopecks": 0,
+          "date": "2026-05-27"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 50,
+      "costKopecks": 177525,
+      "averageKopecks": 3551
+    },
+    {
+      "name": "Charm | Big Kev",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Big Kev",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 3317,
+          "totalKopecks": 82925,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Big Kev",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 1400,
+          "totalKopecks": 35000,
+          "feeKopecks": 0,
+          "date": "2026-05-27"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 50,
+      "costKopecks": 117925,
+      "averageKopecks": 2359
+    },
+    {
+      "name": "Charm | Die-cast AK",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Die-cast AK",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 44500,
+          "totalKopecks": 222500,
+          "feeKopecks": 0,
+          "date": "2025-10-25"
+        },
+        {
+          "name": "Charm | Die-cast AK",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 26849,
+          "totalKopecks": 134245,
+          "feeKopecks": 0,
+          "date": "2026-05-18"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 10,
+      "costKopecks": 356745,
+      "averageKopecks": 35675
+    },
+    {
+      "name": "Charm | Disco MAC",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Disco MAC",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 3,
+          "unitKopecks": 20750,
+          "totalKopecks": 62250,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Disco MAC",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 4,
+          "unitKopecks": 12300,
+          "totalKopecks": 49200,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        },
+        {
+          "name": "Charm | Disco MAC",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 14,
+          "unitKopecks": 2909,
+          "totalKopecks": 40726,
+          "feeKopecks": 0,
+          "date": "2026-05-18"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 21,
+      "costKopecks": 152176,
+      "averageKopecks": 7246
+    },
+    {
+      "name": "Charm | Glamour Shot",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Glamour Shot",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 3,
+          "unitKopecks": 13792,
+          "totalKopecks": 41376,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Glamour Shot",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 18530,
+          "totalKopecks": 92650,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Glamour Shot",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 16,
+          "unitKopecks": 5668,
+          "totalKopecks": 90688,
+          "feeKopecks": 0,
+          "date": "2026-05-18"
+        },
+        {
+          "name": "Charm | Glamour Shot",
+          "category": "Брелоки",
+          "type": "sell",
+          "quantity": 1,
+          "unitKopecks": 0,
+          "totalKopecks": 0,
+          "feeKopecks": 0,
+          "date": "2026-05-18"
+        }
+      ],
+      "realizedKopecks": -13792,
+      "soldCount": 1,
+      "quantity": 23,
+      "costKopecks": 210922,
+      "averageKopecks": 9171
+    },
+    {
+      "name": "Charm | Hot Hands",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Hot Hands",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 13748,
+          "totalKopecks": 13748,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Hot Hands",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 3207,
+          "totalKopecks": 16035,
+          "feeKopecks": 0,
+          "date": "2026-05-18"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 6,
+      "costKopecks": 29783,
+      "averageKopecks": 4964
+    },
+    {
+      "name": "Charm | Hot Sauce",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Hot Sauce",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 2475,
+          "totalKopecks": 61875,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 25,
+      "costKopecks": 61875,
+      "averageKopecks": 2475
+    },
+    {
+      "name": "Charm | Lil' Ava",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Lil' Ava",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 4167,
+          "totalKopecks": 41670,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Lil' Ava",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 30,
+          "unitKopecks": 995,
+          "totalKopecks": 29850,
+          "feeKopecks": 0,
+          "date": "2026-05-27"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 40,
+      "costKopecks": 71520,
+      "averageKopecks": 1788
+    },
+    {
+      "name": "Charm | Lil' Crass",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Charm | Lil' Crass",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 4036,
+          "totalKopecks": 60540,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Charm | Lil' Crass",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 1180,
+          "totalKopecks": 29500,
+          "feeKopecks": 0,
+          "date": "2026-05-27"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 40,
+      "costKopecks": 90040,
+      "averageKopecks": 2251
+    },
+    {
+      "name": "Gallery Case",
+      "category": "Кейсы",
+      "trades": [
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 17,
+          "unitKopecks": 9028,
+          "totalKopecks": 153476,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 37,
+          "unitKopecks": 7756,
+          "totalKopecks": 286972,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 13700,
+          "totalKopecks": 205500,
+          "feeKopecks": 0,
+          "date": "2025-09-17"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 11600,
+          "totalKopecks": 290000,
+          "feeKopecks": 0,
+          "date": "2025-09-18"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 20,
+          "unitKopecks": 10699,
+          "totalKopecks": 213980,
+          "feeKopecks": 0,
+          "date": "2025-09-19"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 7607,
+          "totalKopecks": 76070,
+          "feeKopecks": 0,
+          "date": "2025-09-21"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 10400,
+          "totalKopecks": 156000,
+          "feeKopecks": 0,
+          "date": "2025-09-21"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 20,
+          "unitKopecks": 8588,
+          "totalKopecks": 171760,
+          "feeKopecks": 0,
+          "date": "2025-09-26"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 9540,
+          "totalKopecks": 143100,
+          "feeKopecks": 0,
+          "date": "2025-10-07"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 30,
+          "unitKopecks": 10000,
+          "totalKopecks": 300000,
+          "feeKopecks": 0,
+          "date": "2025-10-09"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 11,
+          "unitKopecks": 9335,
+          "totalKopecks": 102685,
+          "feeKopecks": 0,
+          "date": "2025-10-09"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 10100,
+          "totalKopecks": 10100,
+          "feeKopecks": 0,
+          "date": "2025-10-23"
+        },
+        {
+          "name": "Gallery Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 10750,
+          "totalKopecks": 161250,
+          "feeKopecks": 0,
+          "date": "2025-10-29"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 231,
+      "costKopecks": 2270893,
+      "averageKopecks": 9831
+    },
+    {
+      "name": "Paris 2023 Challengers Sticker Capsule",
+      "category": "Капсулы",
+      "trades": [
+        {
+          "name": "Paris 2023 Challengers Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 100,
+          "unitKopecks": 1063,
+          "totalKopecks": 106300,
+          "feeKopecks": 0,
+          "date": "2026-05-22"
+        },
+        {
+          "name": "Paris 2023 Challengers Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 35,
+          "unitKopecks": 1207,
+          "totalKopecks": 42245,
+          "feeKopecks": 0,
+          "date": "2026-05-23"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 135,
+      "costKopecks": 148545,
+      "averageKopecks": 1100
+    },
+    {
+      "name": "Paris 2023 Contenders Sticker Capsule",
+      "category": "Капсулы",
+      "trades": [
+        {
+          "name": "Paris 2023 Contenders Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 70,
+          "unitKopecks": 1409,
+          "totalKopecks": 98630,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 70,
+      "costKopecks": 98630,
+      "averageKopecks": 1409
+    },
+    {
+      "name": "Paris 2023 Legends Sticker Capsule",
+      "category": "Капсулы",
+      "trades": [
+        {
+          "name": "Paris 2023 Legends Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 50,
+          "unitKopecks": 1930,
+          "totalKopecks": 96500,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Paris 2023 Legends Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 35,
+          "unitKopecks": 1531,
+          "totalKopecks": 53585,
+          "feeKopecks": 0,
+          "date": "2026-05-23"
+        },
+        {
+          "name": "Paris 2023 Legends Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 100,
+          "unitKopecks": 1582,
+          "totalKopecks": 158200,
+          "feeKopecks": 0,
+          "date": "2026-05-23"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 185,
+      "costKopecks": 308285,
+      "averageKopecks": 1666
+    },
+    {
+      "name": "Souvenir Charm | Austin 2025 Highlight | karrigan Double Headshot",
+      "category": "Брелоки",
+      "trades": [
+        {
+          "name": "Souvenir Charm | Austin 2025 Highlight | karrigan Double Headshot",
+          "category": "Брелоки",
+          "type": "buy",
+          "quantity": 6,
+          "unitKopecks": 5000,
+          "totalKopecks": 30000,
+          "feeKopecks": 0,
+          "date": "2025-09-17"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 6,
+      "costKopecks": 30000,
+      "averageKopecks": 5000
+    },
+    {
+      "name": "Sticker | 9INE (Glitter) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | 9INE (Glitter) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 50,
+          "unitKopecks": 1575,
+          "totalKopecks": 78750,
+          "feeKopecks": 0,
+          "date": "2025-09-02"
+        },
+        {
+          "name": "Sticker | 9INE (Glitter) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 2489,
+          "totalKopecks": 37335,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 65,
+      "costKopecks": 116085,
+      "averageKopecks": 1786
+    },
+    {
+      "name": "Sticker | Bolt Charge (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Bolt Charge (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 35800,
+          "totalKopecks": 179000,
+          "feeKopecks": 0,
+          "date": "2025-10-30"
+        },
+        {
+          "name": "Sticker | Bolt Charge (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 26148,
+          "totalKopecks": 130740,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        },
+        {
+          "name": "Sticker | Bolt Charge (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 25914,
+          "totalKopecks": 25914,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        },
+        {
+          "name": "Sticker | Bolt Charge (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 25681,
+          "totalKopecks": 25681,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 12,
+      "costKopecks": 361335,
+      "averageKopecks": 30111
+    },
+    {
+      "name": "Sticker | Bolt Energy (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Bolt Energy (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 14200,
+          "totalKopecks": 142000,
+          "feeKopecks": 0,
+          "date": "2025-10-30"
+        },
+        {
+          "name": "Sticker | Bolt Energy (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 3500,
+          "totalKopecks": 3500,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 11,
+      "costKopecks": 145500,
+      "averageKopecks": 13227
+    },
+    {
+      "name": "Sticker | Bolt Strike (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Bolt Strike (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 22500,
+          "totalKopecks": 112500,
+          "feeKopecks": 0,
+          "date": "2025-10-30"
+        },
+        {
+          "name": "Sticker | Bolt Strike (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 3500,
+          "totalKopecks": 3500,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        },
+        {
+          "name": "Sticker | Bolt Strike (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 17198,
+          "totalKopecks": 17198,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        },
+        {
+          "name": "Sticker | Bolt Strike (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 2,
+          "unitKopecks": 28716,
+          "totalKopecks": 57432,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 9,
+      "costKopecks": 190630,
+      "averageKopecks": 21181
+    },
+    {
+      "name": "Sticker | Boom Trail (Glitter)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Boom Trail (Glitter)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 2649,
+          "totalKopecks": 39735,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Sticker | Boom Trail (Glitter)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 3,
+          "unitKopecks": 3500,
+          "totalKopecks": 10500,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 18,
+      "costKopecks": 50235,
+      "averageKopecks": 2791
+    },
+    {
+      "name": "Sticker | Chompers",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Chompers",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 2640,
+          "totalKopecks": 66000,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Sticker | Chompers",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 100,
+          "unitKopecks": 2656,
+          "totalKopecks": 265600,
+          "feeKopecks": 0,
+          "date": "2025-10-06"
+        },
+        {
+          "name": "Sticker | Chompers",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 20,
+          "unitKopecks": 2395,
+          "totalKopecks": 47900,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        },
+        {
+          "name": "Sticker | Chompers",
+          "category": "Наклейки · Arma",
+          "type": "sell",
+          "quantity": 1,
+          "unitKopecks": 2300,
+          "totalKopecks": 2300,
+          "feeKopecks": 0,
+          "date": "2025-10-27"
+        }
+      ],
+      "realizedKopecks": -340,
+      "soldCount": 1,
+      "quantity": 144,
+      "costKopecks": 376860,
+      "averageKopecks": 2617
+    },
+    {
+      "name": "Sticker | ENCE (Holo) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | ENCE (Holo) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 20,
+          "unitKopecks": 3595,
+          "totalKopecks": 71900,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 20,
+      "costKopecks": 71900,
+      "averageKopecks": 3595
+    },
+    {
+      "name": "Sticker | Fnatic (Holo) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | Fnatic (Holo) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 7577,
+          "totalKopecks": 113655,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        },
+        {
+          "name": "Sticker | Fnatic (Holo) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "sell",
+          "quantity": 5,
+          "unitKopecks": 7500,
+          "totalKopecks": 37500,
+          "feeKopecks": 0,
+          "date": "2025-11-01"
+        }
+      ],
+      "realizedKopecks": -385,
+      "soldCount": 5,
+      "quantity": 10,
+      "costKopecks": 75770,
+      "averageKopecks": 7577
+    },
+    {
+      "name": "Sticker | forZe eSports (Glitter) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | forZe eSports (Glitter) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 100,
+          "unitKopecks": 880,
+          "totalKopecks": 88000,
+          "feeKopecks": 0,
+          "date": "2025-09-09"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 100,
+      "costKopecks": 88000,
+      "averageKopecks": 880
+    },
+    {
+      "name": "Sticker | FURIA (Glitter) | Copenhagen 2024",
+      "category": "Наклейки · Copenhagen",
+      "trades": [
+        {
+          "name": "Sticker | FURIA (Glitter) | Copenhagen 2024",
+          "category": "Наклейки · Copenhagen",
+          "type": "buy",
+          "quantity": 8,
+          "unitKopecks": 1800,
+          "totalKopecks": 14400,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 8,
+      "costKopecks": 14400,
+      "averageKopecks": 1800
+    },
+    {
+      "name": "Sticker | G2 Esports (Glitter) | Copenhagen 2024",
+      "category": "Наклейки · Copenhagen",
+      "trades": [
+        {
+          "name": "Sticker | G2 Esports (Glitter) | Copenhagen 2024",
+          "category": "Наклейки · Copenhagen",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 2000,
+          "totalKopecks": 30000,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 15,
+      "costKopecks": 30000,
+      "averageKopecks": 2000
+    },
+    {
+      "name": "Sticker | G2 Esports (Glitter) | Shanghai 2024",
+      "category": "Наклейки · Shanghai",
+      "trades": [
+        {
+          "name": "Sticker | G2 Esports (Glitter) | Shanghai 2024",
+          "category": "Наклейки · Shanghai",
+          "type": "buy",
+          "quantity": 125,
+          "unitKopecks": 1300,
+          "totalKopecks": 162500,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 125,
+      "costKopecks": 162500,
+      "averageKopecks": 1300
+    },
+    {
+      "name": "Sticker | GamerLegion (Glitter) | Copenhagen 2024",
+      "category": "Наклейки · Copenhagen",
+      "trades": [
+        {
+          "name": "Sticker | GamerLegion (Glitter) | Copenhagen 2024",
+          "category": "Наклейки · Copenhagen",
+          "type": "buy",
+          "quantity": 20,
+          "unitKopecks": 1800,
+          "totalKopecks": 36000,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 20,
+      "costKopecks": 36000,
+      "averageKopecks": 1800
+    },
+    {
+      "name": "Sticker | Gold Teef (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Gold Teef (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 9478,
+          "totalKopecks": 142170,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 15,
+      "costKopecks": 142170,
+      "averageKopecks": 9478
+    },
+    {
+      "name": "Sticker | Heroic (Glitter) | Copenhagen 2024",
+      "category": "Наклейки · Copenhagen",
+      "trades": [
+        {
+          "name": "Sticker | Heroic (Glitter) | Copenhagen 2024",
+          "category": "Наклейки · Copenhagen",
+          "type": "buy",
+          "quantity": 18,
+          "unitKopecks": 900,
+          "totalKopecks": 16200,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 18,
+      "costKopecks": 16200,
+      "averageKopecks": 900
+    },
+    {
+      "name": "Sticker | Heroic (Glitter) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | Heroic (Glitter) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 13,
+          "unitKopecks": 340,
+          "totalKopecks": 4420,
+          "feeKopecks": 0,
+          "date": "2025-08-31"
+        },
+        {
+          "name": "Sticker | Heroic (Glitter) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 165,
+          "unitKopecks": 376,
+          "totalKopecks": 62040,
+          "feeKopecks": 0,
+          "date": "2025-09-02"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 178,
+      "costKopecks": 66460,
+      "averageKopecks": 373
+    },
+    {
+      "name": "Sticker | HEROIC (Glitter) | Shanghai 2024",
+      "category": "Наклейки · Shanghai",
+      "trades": [
+        {
+          "name": "Sticker | HEROIC (Glitter) | Shanghai 2024",
+          "category": "Наклейки · Shanghai",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 730,
+          "totalKopecks": 730,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 1,
+      "costKopecks": 730,
+      "averageKopecks": 730
+    },
+    {
+      "name": "Sticker | Heroic (Holo) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | Heroic (Holo) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 12665,
+          "totalKopecks": 63325,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Sticker | Heroic (Holo) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 6770,
+          "totalKopecks": 67700,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 15,
+      "costKopecks": 131025,
+      "averageKopecks": 8735
+    },
+    {
+      "name": "Sticker | High Heat",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | High Heat",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 20,
+          "unitKopecks": 8500,
+          "totalKopecks": 170000,
+          "feeKopecks": 0,
+          "date": "2025-10-30"
+        },
+        {
+          "name": "Sticker | High Heat",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 14,
+          "unitKopecks": 3500,
+          "totalKopecks": 49000,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        },
+        {
+          "name": "Sticker | High Heat",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 1,
+          "unitKopecks": 5681,
+          "totalKopecks": 5681,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 35,
+      "costKopecks": 224681,
+      "averageKopecks": 6419
+    },
+    {
+      "name": "Sticker | Hydro Stream",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Hydro Stream",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 50,
+          "unitKopecks": 1300,
+          "totalKopecks": 65000,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Sticker | Hydro Stream",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 3500,
+          "totalKopecks": 17500,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 55,
+      "costKopecks": 82500,
+      "averageKopecks": 1500
+    },
+    {
+      "name": "Sticker | Hydro Wave",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Hydro Wave",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 2450,
+          "totalKopecks": 61250,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Sticker | Hydro Wave",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 12,
+          "unitKopecks": 3500,
+          "totalKopecks": 42000,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 37,
+      "costKopecks": 103250,
+      "averageKopecks": 2791
+    },
+    {
+      "name": "Sticker | Hypnoteyes (Holo)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Hypnoteyes (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 13000,
+          "totalKopecks": 130000,
+          "feeKopecks": 0,
+          "date": "2025-09-21"
+        },
+        {
+          "name": "Sticker | Hypnoteyes (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 9672,
+          "totalKopecks": 96720,
+          "feeKopecks": 0,
+          "date": "2025-09-26"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 20,
+      "costKopecks": 226720,
+      "averageKopecks": 11336
+    },
+    {
+      "name": "Sticker | Kawaii Eyes (Glitter)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Kawaii Eyes (Glitter)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 8966,
+          "totalKopecks": 89660,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Sticker | Kawaii Eyes (Glitter)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 10034,
+          "totalKopecks": 100340,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 20,
+      "costKopecks": 190000,
+      "averageKopecks": 9500
+    },
+    {
+      "name": "Sticker | MOUZ (Glitter) | Shanghai 2024",
+      "category": "Наклейки · Shanghai",
+      "trades": [
+        {
+          "name": "Sticker | MOUZ (Glitter) | Shanghai 2024",
+          "category": "Наклейки · Shanghai",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 5200,
+          "totalKopecks": 78000,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 15,
+      "costKopecks": 78000,
+      "averageKopecks": 5200
+    },
+    {
+      "name": "Sticker | Mustachio (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Mustachio (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 10,
+          "unitKopecks": 15285,
+          "totalKopecks": 152850,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 10,
+      "costKopecks": 152850,
+      "averageKopecks": 15285
+    },
+    {
+      "name": "Sticker | Natus Vincere (Glitter) | Shanghai 2024",
+      "category": "Наклейки · Shanghai",
+      "trades": [
+        {
+          "name": "Sticker | Natus Vincere (Glitter) | Shanghai 2024",
+          "category": "Наклейки · Shanghai",
+          "type": "buy",
+          "quantity": 19,
+          "unitKopecks": 2200,
+          "totalKopecks": 41800,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 19,
+      "costKopecks": 41800,
+      "averageKopecks": 2200
+    },
+    {
+      "name": "Sticker | OG (Holo) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | OG (Holo) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 9570,
+          "totalKopecks": 143550,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 15,
+      "costKopecks": 143550,
+      "averageKopecks": 9570
+    },
+    {
+      "name": "Sticker | Red Shades (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Red Shades (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 14,
+          "unitKopecks": 20316,
+          "totalKopecks": 284424,
+          "feeKopecks": 0,
+          "date": "2025-10-30"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 14,
+      "costKopecks": 284424,
+      "averageKopecks": 20316
+    },
+    {
+      "name": "Sticker | Ruby Stream (Lenticular)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Ruby Stream (Lenticular)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 2,
+          "unitKopecks": 50739,
+          "totalKopecks": 101478,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 2,
+      "costKopecks": 101478,
+      "averageKopecks": 50739
+    },
+    {
+      "name": "Sticker | Say Cheese (Holo)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Say Cheese (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 8,
+          "unitKopecks": 9800,
+          "totalKopecks": 78400,
+          "feeKopecks": 0,
+          "date": "2025-09-22"
+        },
+        {
+          "name": "Sticker | Say Cheese (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 12,
+          "unitKopecks": 7754,
+          "totalKopecks": 93048,
+          "feeKopecks": 0,
+          "date": "2025-09-26"
+        },
+        {
+          "name": "Sticker | Say Cheese (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 10320,
+          "totalKopecks": 51600,
+          "feeKopecks": 0,
+          "date": "2025-10-24"
+        },
+        {
+          "name": "Sticker | Say Cheese (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "sell",
+          "quantity": 3,
+          "unitKopecks": 10300,
+          "totalKopecks": 30900,
+          "feeKopecks": 0,
+          "date": "2025-10-27"
+        },
+        {
+          "name": "Sticker | Say Cheese (Holo)",
+          "category": "Наклейки · Arma",
+          "type": "sell",
+          "quantity": 1,
+          "unitKopecks": 0,
+          "totalKopecks": 0,
+          "feeKopecks": 0,
+          "date": "2025-11-09"
+        }
+      ],
+      "realizedKopecks": -8300,
+      "soldCount": 4,
+      "quantity": 21,
+      "costKopecks": 183848,
+      "averageKopecks": 8755
+    },
+    {
+      "name": "Sticker | Team Spirit (Glitter) | Shanghai 2024",
+      "category": "Наклейки · Shanghai",
+      "trades": [
+        {
+          "name": "Sticker | Team Spirit (Glitter) | Shanghai 2024",
+          "category": "Наклейки · Shanghai",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 2811,
+          "totalKopecks": 70275,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 25,
+      "costKopecks": 70275,
+      "averageKopecks": 2811
+    },
+    {
+      "name": "Sticker | Vitality (Glitter) | Copenhagen 2024",
+      "category": "Наклейки · Copenhagen",
+      "trades": [
+        {
+          "name": "Sticker | Vitality (Glitter) | Copenhagen 2024",
+          "category": "Наклейки · Copenhagen",
+          "type": "buy",
+          "quantity": 15,
+          "unitKopecks": 1800,
+          "totalKopecks": 27000,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 15,
+      "costKopecks": 27000,
+      "averageKopecks": 1800
+    },
+    {
+      "name": "Sticker | Vitality (Glitter) | Paris 2023",
+      "category": "Наклейки · Paris",
+      "trades": [
+        {
+          "name": "Sticker | Vitality (Glitter) | Paris 2023",
+          "category": "Наклейки · Paris",
+          "type": "buy",
+          "quantity": 150,
+          "unitKopecks": 468,
+          "totalKopecks": 70200,
+          "feeKopecks": 0,
+          "date": "2025-09-03"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 150,
+      "costKopecks": 70200,
+      "averageKopecks": 468
+    },
+    {
+      "name": "Sticker | Winding Scorch (Foil)",
+      "category": "Наклейки · Arma",
+      "trades": [
+        {
+          "name": "Sticker | Winding Scorch (Foil)",
+          "category": "Наклейки · Arma",
+          "type": "buy",
+          "quantity": 5,
+          "unitKopecks": 26848,
+          "totalKopecks": 134240,
+          "feeKopecks": 0,
+          "date": "2026-04-21"
+        }
+      ],
+      "realizedKopecks": 0,
+      "soldCount": 0,
+      "quantity": 5,
+      "costKopecks": 134240,
+      "averageKopecks": 26848
+    }
+  ],
+  "closedItems": [
+    {
+      "name": "Austin 2025 Contenders Sticker Capsule",
+      "category": "Капсулы",
+      "trades": [
+        {
+          "name": "Austin 2025 Contenders Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 25,
+          "unitKopecks": 2335,
+          "totalKopecks": 58375,
+          "feeKopecks": 0,
+          "date": "2025-09-26"
+        },
+        {
+          "name": "Austin 2025 Contenders Sticker Capsule",
+          "category": "Капсулы",
+          "type": "buy",
+          "quantity": 60,
+          "unitKopecks": 2100,
+          "totalKopecks": 126000,
+          "feeKopecks": 0,
+          "date": "2025-09-27"
+        },
+        {
+          "name": "Austin 2025 Contenders Sticker Capsule",
+          "category": "Капсулы",
+          "type": "sell",
+          "quantity": 40,
+          "unitKopecks": 3783,
+          "totalKopecks": 151320,
+          "feeKopecks": 0,
+          "date": "2026-03-19"
+        },
+        {
+          "name": "Austin 2025 Contenders Sticker Capsule",
+          "category": "Капсулы",
+          "type": "sell",
+          "quantity": 45,
+          "unitKopecks": 3488,
+          "totalKopecks": 156960,
+          "feeKopecks": 0,
+          "date": "2026-04-06"
+        }
+      ],
+      "realizedKopecks": 123905,
+      "soldCount": 85,
+      "quantity": 0,
+      "costKopecks": 0,
+      "averageKopecks": 0
+    },
+    {
+      "name": "Fracture Case",
+      "category": "Кейсы",
+      "trades": [
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 2,
+          "unitKopecks": 4182,
+          "totalKopecks": 8364,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 96,
+          "unitKopecks": 2811,
+          "totalKopecks": 269856,
+          "feeKopecks": 0,
+          "date": "2025-09-10"
+        },
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "buy",
+          "quantity": 35,
+          "unitKopecks": 4000,
+          "totalKopecks": 140000,
+          "feeKopecks": 0,
+          "date": "2025-09-17"
+        },
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "sell",
+          "quantity": 33,
+          "unitKopecks": 5796,
+          "totalKopecks": 191268,
+          "feeKopecks": 0,
+          "date": "2025-09-17"
+        },
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "sell",
+          "quantity": 35,
+          "unitKopecks": 7834,
+          "totalKopecks": 274190,
+          "feeKopecks": 0,
+          "date": "2025-09-18"
+        },
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "sell",
+          "quantity": 35,
+          "unitKopecks": 6088,
+          "totalKopecks": 213080,
+          "feeKopecks": 0,
+          "date": "2026-03-19"
+        },
+        {
+          "name": "Fracture Case",
+          "category": "Кейсы",
+          "type": "sell",
+          "quantity": 30,
+          "unitKopecks": 6722,
+          "totalKopecks": 201660,
+          "feeKopecks": 0,
+          "date": "2026-04-13"
+        }
+      ],
+      "realizedKopecks": 461978,
+      "soldCount": 133,
+      "quantity": 0,
+      "costKopecks": 0,
+      "averageKopecks": 0
+    }
+  ]
+}

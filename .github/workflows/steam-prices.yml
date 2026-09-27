@@ -1,0 +1,30 @@
+name: Steam prices
+
+on:
+  schedule:
+    - cron: '13,43 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-prices
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/update-prices.mjs
+      - name: Publish snapshot
+        run: |
+          git config user.name 'Tracker price bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/prices.json data/history.json
+          git diff --cached --quiet || (git commit -m 'data: refresh Steam prices' && git push)
