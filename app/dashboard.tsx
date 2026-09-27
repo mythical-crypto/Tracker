@@ -49,7 +49,9 @@ function ValueChart({ history, cost }: { history: History; cost: number }) {
   return <div className="value-chart"><div className="chart-axis"><span>{rub(max)}</span><span>{rub((max + min) / 2)}</span><span>{rub(min)}</span></div><svg viewBox="0 0 720 230" preserveAspectRatio="none" role="img" aria-label="История стоимости портфеля по ценам Steam"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#c8f46a" stopOpacity=".28"/><stop offset="1" stopColor="#c8f46a" stopOpacity="0"/></linearGradient></defs><line x1="38" y1="37" x2="680" y2="37" stroke="var(--line)" strokeDasharray="4 6"/><line x1="38" y1="119" x2="680" y2="119" stroke="var(--line)" strokeDasharray="4 6"/><line x1="38" y1="202" x2="680" y2="202" stroke="var(--line)" strokeDasharray="4 6"/><polygon points={area} fill="url(#chart-fill)"/><polyline points={costLine} fill="none" stroke="#79819a" strokeWidth="2" strokeDasharray="5 6" vectorEffect="non-scaling-stroke"/><polyline points={line} fill="none" stroke="#c8f46a" strokeWidth="3" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round"/></svg><div className="chart-dates"><span>{dateTime(data[0].at)}</span><span>{dateTime(data[data.length - 1].at)}</span></div></div>;
 }
 
-export default function Dashboard({ portfolio, prices, history }: { portfolio: Portfolio; prices: Prices; history: History }) {
+export default function Dashboard({ portfolio, prices: initialPrices, history: initialHistory }: { portfolio: Portfolio; prices: Prices; history: History }) {
+  const [prices, setPrices] = useState(initialPrices);
+  const [history, setHistory] = useState(initialHistory);
   const [prefs, setPrefs] = useState<Preferences>(defaultPreferences);
   const [itemOptions, setItemOptions] = useState<Record<string, ItemOptions>>({});
   const [query, setQuery] = useState('');
@@ -73,6 +75,23 @@ export default function Dashboard({ portfolio, prices, history }: { portfolio: P
   useEffect(() => { if (ready) localStorage.setItem('tracker.preferences.v1', JSON.stringify(prefs)); }, [prefs, ready]);
   useEffect(() => { if (ready) localStorage.setItem('tracker.item-options.v1', JSON.stringify(itemOptions)); }, [itemOptions, ready]);
   useEffect(() => { setPage(1); }, [query, category, sort]);
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      const bucket = Math.floor(Date.now() / 300000);
+      const root = 'https://raw.githubusercontent.com/mythical-crypto/Tracker/main/data/';
+      const results = await Promise.allSettled([
+        fetch(`${root}prices.json?refresh=${bucket}`, { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error('Нет снимка цен'); return response.json(); }),
+        fetch(`${root}history.json?refresh=${bucket}`, { cache: 'no-store' }).then((response) => { if (!response.ok) throw new Error('Нет истории цен'); return response.json(); }),
+      ]);
+      if (!active) return;
+      if (results[0].status === 'fulfilled' && results[0].value?.source === 'Steam Community Market' && results[0].value?.currency === 'RUB') setPrices(results[0].value);
+      if (results[1].status === 'fulfilled' && Array.isArray(results[1].value?.snapshots)) setHistory(results[1].value);
+    };
+    void refresh();
+    const interval = setInterval(() => { void refresh(); }, 300000);
+    return () => { active = false; clearInterval(interval); };
+  }, []);
 
   const positions = useMemo<Position[]>(() => portfolio.items.map((item) => {
     const price = prices.items[item.name];
