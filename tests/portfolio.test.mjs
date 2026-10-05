@@ -4,15 +4,19 @@ import { readFileSync } from 'node:fs';
 import { parseCsv, aggregate } from '../scripts/import-csv.mjs';
 import { retainSnapshots } from '../scripts/history.mjs';
 
-test('история сохраняет частые новые снимки и прореживает старые', () => {
+test('история сохраняет 15-минутные наблюдения, недельные и годовые точки без лимита 240', () => {
   const now = Date.parse('2026-09-28T00:00:00Z');
-  const snapshots = Array.from({ length: 1000 }, (_, index) => ({ at: new Date(now - (1000 - index) * 30 * 60 * 1000).toISOString() }));
+  const count = 400 * 96;
+  const snapshots = Array.from({ length: count }, (_, index) => ({ at: new Date(now - (count - index) * 15 * 60 * 1000).toISOString() }));
   const retained = retainSnapshots(snapshots, now);
-  assert.deepEqual(retained.slice(-96), snapshots.slice(-96));
-  const olderDays = retained.slice(0, -96).map((snapshot) => snapshot.at.slice(0, 10));
-  assert.equal(new Set(olderDays).size, olderDays.length);
-  assert.ok(retained.length < 150);
-  assert.ok(retained.length > 100);
+  assert.deepEqual(retained.slice(-192), snapshots.slice(-192));
+  for (const days of [7, 30, 365, 390]) {
+    const target = now - days * 86400000;
+    assert.ok(retained.some((snapshot) => Math.abs(Date.parse(snapshot.at) - target) < (days > 366 ? 7 : 1) * 86400000));
+  }
+  assert.ok(retained.length > 600 && retained.length < 900);
+  assert.ok(retained.every((snapshot) => snapshots.includes(snapshot)));
+  assert.deepEqual(retainSnapshots([...snapshots].reverse(), now), retained);
 });
 
 test('CSV сохраняет кавычки, запятые и русские названия', () => {

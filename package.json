@@ -9,7 +9,11 @@
     "start": "next start",
     "check": "node --test tests/*.test.mjs && next build",
     "import:csv": "node scripts/import-csv.mjs",
-    "prices:update": "node scripts/update-prices.mjs"
+    "import:sandbox": "node scripts/import-sandbox-history.mjs",
+    "prices:update": "node scripts/update-prices.mjs",
+    "extras:update": "node scripts/update-extras.mjs",
+    "history:record": "node scripts/record-total.mjs",
+    "hindsight:start": "node scripts/hindsight-start.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

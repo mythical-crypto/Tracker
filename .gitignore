@@ -2,4 +2,7 @@ node_modules
 .next
 .vercel
 .env*
+!.env.example
 *.log
+.local/
+*.tsbuildinfo

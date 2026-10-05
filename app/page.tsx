@@ -1,8 +1,6 @@
 import Dashboard from './dashboard';
-import portfolio from '@/data/portfolio.json';
-import prices from '@/data/prices.json';
-import history from '@/data/history.json';
+import { loadPortfolio } from '@/lib/portfolio-data';
 
-export default function Page() {
-  return <Dashboard portfolio={portfolio} prices={prices} history={history} />;
+export default async function Page() {
+  return <Dashboard initialData={await loadPortfolio()} section="overview" />;
 }

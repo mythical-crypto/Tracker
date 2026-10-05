@@ -2,7 +2,7 @@ name: Steam prices
 
 on:
   schedule:
-    - cron: '13,43 * * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -15,17 +15,33 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
           package-manager-cache: false
-      - run: node scripts/update-prices.mjs
+      - name: Refresh CS2
+        id: cs2
+        timeout-minutes: 6
+        continue-on-error: true
+        run: node scripts/update-prices.mjs
+      - name: Refresh Sandbox and crypto
+        id: extras
+        timeout-minutes: 3
+        continue-on-error: true
+        run: node scripts/update-extras.mjs
+      - name: Record combined value
+        id: combined
+        continue-on-error: true
+        run: node scripts/record-total.mjs
       - name: Publish snapshot
         run: |
           git config user.name 'Tracker price bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add data/prices.json data/history.json data/live.json
+          git add data/prices.json data/history.json data/live.json data/sandbox.json data/crypto.json data/combined-history.json
           git diff --cached --quiet || (git commit -m 'data: refresh Steam prices' && git push)
+      - name: Report source failure
+        if: steps.cs2.outcome == 'failure' || steps.extras.outcome == 'failure' || steps.combined.outcome == 'failure'
+        run: exit 1

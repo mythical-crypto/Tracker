@@ -1,11 +1,9 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { retainSnapshots } from './history.mjs';
+import { fetchSteamPrice, transientSourceFailure } from './extra-sources.mjs';
 
-const portfolio = JSON.parse(readFileSync('data/portfolio.json', 'utf8'));
-const previous = JSON.parse(readFileSync('data/prices.json', 'utf8'));
-const history = JSON.parse(readFileSync('data/history.json', 'utf8'));
-const withIcons = process.argv.includes('--icons');
-const iconsOnly = process.argv.includes('--icons-only');
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function steamJson(url) {
@@ -24,21 +22,10 @@ async function steamJson(url) {
   }
 }
 
-export function rublesToKopecks(text) {
-  const amount = String(text).replace(/\s/g, '').match(/\d+(?:[,.]\d{1,2})?/);
-  const parsed = amount ? Number(amount[0].replace(',', '.')) : NaN;
-  if (!Number.isFinite(parsed) || parsed <= 0) throw new Error(`Некорректная цена Steam: ${text}`);
-  return Math.round(parsed * 100);
-}
+export { rublesToKopecks } from './extra-sources.mjs';
 
 async function fetchPrice(name) {
-  const url = new URL('https://steamcommunity.com/market/priceoverview/');
-  url.searchParams.set('appid', '730');
-  url.searchParams.set('currency', '5');
-  url.searchParams.set('market_hash_name', name);
-  const body = await steamJson(url);
-  if (!String(body.lowest_price).includes('руб')) throw new Error(`Steam не подтвердил RUB: ${body.lowest_price}`);
-  return rublesToKopecks(body.lowest_price);
+  return Math.round(await fetchSteamPrice(name, { appid: '730' }) * 100);
 }
 
 async function fetchIcon(name) {
@@ -61,50 +48,79 @@ async function fetchIcon(name) {
   return match[1].replaceAll('&amp;', '&');
 }
 
-const now = new Date().toISOString();
-const prices = { ...previous, source: 'Steam Community Market', currency: 'RUB', lastAttemptAt: iconsOnly ? previous.lastAttemptAt : now, items: { ...previous.items } };
-let successful = 0, errors = 0;
-for (const [index, item] of portfolio.items.entries()) {
-  const existing = prices.items[item.name] || {};
-  const next = { ...existing };
-  if (!iconsOnly) {
-    try {
-      next.priceKopecks = await fetchPrice(item.name);
-      next.updatedAt = new Date().toISOString();
-      delete next.error;
-      successful++;
-    } catch (error) {
-      next.error = String(error.message);
-      errors++;
+export async function refreshPrices(portfolio, previous, previousHistory, { iconsOnly = false, withIcons = false, fetchQuote = fetchPrice, fetchImage = fetchIcon, wait = pause, clock = () => new Date().toISOString(), logger = console } = {}) {
+  const history = { ...previousHistory, snapshots: [...previousHistory.snapshots] };
+  const prices = { ...previous, source: 'Steam Community Market', currency: 'RUB', items: { ...previous.items } };
+  let successful = 0, errors = 0;
+  let consecutiveTransientFailures = 0;
+  let unavailable = false;
+  const requestedItems = [...portfolio.items].sort((a, b) => (Date.parse(prices.items[a.name]?.updatedAt) || 0) - (Date.parse(prices.items[b.name]?.updatedAt) || 0));
+  for (const [index, item] of requestedItems.entries()) {
+    const existing = prices.items[item.name] || {};
+    const next = { ...existing };
+    if (!iconsOnly) {
+      try {
+        if (unavailable) throw new Error('Steam временно недоступен; сохранена прежняя котировка');
+        const price = await fetchQuote(item.name);
+        if (!Number.isSafeInteger(price) || price <= 0) throw new Error('Некорректная цена Steam');
+        next.priceKopecks = price;
+        next.updatedAt = clock();
+        delete next.error;
+        successful++;
+        consecutiveTransientFailures = 0;
+      } catch (error) {
+        next.error = String(error.message);
+        errors++;
+        consecutiveTransientFailures = transientSourceFailure(error) ? consecutiveTransientFailures + 1 : 0;
+        if (consecutiveTransientFailures >= 3) unavailable = true;
+      }
     }
+    if (withIcons && !next.icon) {
+      try { next.icon = await fetchImage(item.name); delete next.iconError; }
+      catch (error) { next.iconError = String(error.message); }
+    }
+    prices.items[item.name] = next;
+    logger.log(`${index + 1}/${portfolio.items.length} ${item.name}: ${next.priceKopecks ? `${(next.priceKopecks / 100).toFixed(2)} ₽` : 'нет цены'}${next.error ? ` (${next.error})` : ''}`);
+    if (index < portfolio.items.length - 1 && !unavailable && (!iconsOnly || !existing.icon)) await wait(4000);
   }
-  if (withIcons && !next.icon) {
-    try { next.icon = await fetchIcon(item.name); delete next.iconError; }
-    catch (error) { next.iconError = String(error.message); }
+
+  const now = clock();
+  if (!iconsOnly) {
+    prices.lastAttemptAt = now;
+    prices.freshCount = successful;
+    prices.totalCount = portfolio.items.length;
+    prices.lastSuccessAt = successful ? now : previous.lastSuccessAt;
+    prices.lastFullSuccessAt = successful > 0 && errors === 0 ? now : previous.lastFullSuccessAt;
   }
-  prices.items[item.name] = next;
-  process.stdout.write(`${index + 1}/${portfolio.items.length} ${item.name}: ${next.priceKopecks ? `${(next.priceKopecks / 100).toFixed(2)} ₽` : 'нет цены'}${next.error ? ` (${next.error})` : ''}\n`);
-  if (!iconsOnly || !existing.icon) await pause(2200);
+  const valueKopecks = portfolio.items.reduce((sum, item) => sum + item.quantity * (prices.items[item.name]?.priceKopecks || 0), 0);
+  const costKopecks = portfolio.items.reduce((sum, item) => sum + item.costKopecks, 0);
+  if (!iconsOnly && successful > 0) {
+    const itemPrices = Object.fromEntries(portfolio.items.flatMap((item) => {
+      const price = prices.items[item.name]?.priceKopecks;
+      return Number.isSafeInteger(price) && price > 0 ? [[item.name, price]] : [];
+    }));
+    const held = portfolio.items.filter((item) => item.quantity > 0);
+    const itemQuantities = Object.fromEntries(held.map((item) => [item.name, item.quantity]));
+    const itemUpdatedAt = Object.fromEntries(held.filter((item) => prices.items[item.name]?.updatedAt && itemPrices[item.name] !== undefined).map((item) => [item.name, prices.items[item.name].updatedAt]));
+    history.snapshots.push({ at: now, valueKopecks, costKopecks, freshCount: successful, totalCount: held.length, pricedCount: Object.keys(itemPrices).length, complete: Object.keys(itemPrices).length === held.length, coverageKey: Object.keys(itemPrices).sort().join('|'), quantityKey: held.map((item) => `${item.name}:${item.quantity}`).sort().join('|'), itemPrices, itemQuantities, itemUpdatedAt, quoteDates: itemUpdatedAt });
+    history.snapshots = retainSnapshots(history.snapshots, Date.parse(now));
+  }
+  return { prices, history, successful, errors };
 }
 
-if (!iconsOnly) {
-  prices.freshCount = successful;
-  prices.totalCount = portfolio.items.length;
-  prices.lastSuccessAt = successful ? now : previous.lastSuccessAt;
-  prices.lastFullSuccessAt = errors === 0 ? now : previous.lastFullSuccessAt;
+async function main() {
+  const portfolio = JSON.parse(readFileSync('data/portfolio.json', 'utf8'));
+  const previous = JSON.parse(readFileSync('data/prices.json', 'utf8'));
+  const previousHistory = JSON.parse(readFileSync('data/history.json', 'utf8'));
+  const iconsOnly = process.argv.includes('--icons-only');
+  const { prices, history, successful, errors } = await refreshPrices(portfolio, previous, previousHistory, { iconsOnly, withIcons: process.argv.includes('--icons') || iconsOnly });
+  writeFileSync('data/prices.json', JSON.stringify(prices, null, 2) + '\n');
+  writeFileSync('data/history.json', JSON.stringify(history, null, 2) + '\n');
+  writeFileSync('data/live.json', JSON.stringify({ prices, history }) + '\n');
+  process.stdout.write(iconsOnly ? `Изображения Steam: ${Object.values(prices.items).filter((item) => item.icon).length}/${portfolio.items.length}\n` : `Обновлено ${successful}/${portfolio.items.length}; ошибок ${errors}\n`);
+  if (!iconsOnly && successful === 0) process.exitCode = 1;
 }
-const valueKopecks = portfolio.items.reduce((sum, item) => sum + item.quantity * (prices.items[item.name]?.priceKopecks || 0), 0);
-const costKopecks = portfolio.items.reduce((sum, item) => sum + item.costKopecks, 0);
-if (!iconsOnly && successful > 0) {
-  const itemPrices = Object.fromEntries(portfolio.items.flatMap((item) => {
-    const price = prices.items[item.name]?.priceKopecks;
-    return typeof price === 'number' ? [[item.name, price]] : [];
-  }));
-  history.snapshots.push({ at: now, valueKopecks, costKopecks, freshCount: successful, totalCount: portfolio.items.length, itemPrices });
-  history.snapshots = retainSnapshots(history.snapshots, Date.parse(now));
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch((error) => { console.error(error.message); process.exitCode = 1; });
 }
-writeFileSync('data/prices.json', JSON.stringify(prices, null, 2) + '\n');
-writeFileSync('data/history.json', JSON.stringify(history, null, 2) + '\n');
-writeFileSync('data/live.json', JSON.stringify({ prices, history }) + '\n');
-process.stdout.write(iconsOnly ? `Изображения Steam: ${Object.values(prices.items).filter((item) => item.icon).length}/${portfolio.items.length}\n` : `Обновлено ${successful}/${portfolio.items.length}; ошибок ${errors}\n`);
-if (!iconsOnly && successful === 0) process.exitCode = 1;
