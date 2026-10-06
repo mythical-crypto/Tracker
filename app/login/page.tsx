@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SESSION_COOKIE_NAME, verifySessionValue, safeLoginDestination } from '@/lib/auth.mjs';
 import LoginForm from './login-form';
+import Link from 'next/link';
+import '../public-pages.css';
 
 type Props = { searchParams: Promise<{ next?: string | string[] }> };
 
@@ -13,13 +15,16 @@ export default async function LoginPage({ searchParams }: Props) {
   const destination = safeLoginDestination(candidate);
 
   return (
-    <main className="vault-login">
-      <section className="login-card" aria-labelledby="login-title">
-        <p className="login-eyebrow">PRIVATE VAULT</p>
-        <h1 id="login-title">Вход в портфель</h1>
-        <p className="login-description">Введите учётные данные, чтобы продолжить.</p>
-        <LoginForm destination={destination} />
-      </section>
-    </main>
+    <div className="public-page public-login-page">
+      <header className="public-header public-login-header">
+        <Link className="public-brand" href="/welcome">Tracker</Link>
+      </header>
+      <main className="public-login-main">
+        <section className="public-login-panel" aria-labelledby="login-title">
+          <h1 id="login-title">Вход в портфель</h1>
+          <LoginForm destination={destination} />
+        </section>
+      </main>
+    </div>
   );
 }
