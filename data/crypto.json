@@ -1,7 +1,7 @@
 {
   "source": "DropsTab",
   "fetchedAt": "2026-10-06T06:53:13.383Z",
-  "freshCount": 6,
+  "freshCount": 0,
   "totalCount": 6,
   "sourceUrl": "https://dropstab.com/p/na-piccu-x62hsarup5",
   "items": [
@@ -1008,10 +1008,12 @@
   ],
   "notes": [
     "Рыночная история доступного источника не получена; график может использовать только снимки, зафиксированные самим трекером после этого обновления.",
-    "Данные USD/RUB — отношение оценок портфеля DropsTab в RUB и USD, не отдельный курс валютного провайдера."
+    "Данные USD/RUB — отношение оценок портфеля DropsTab в RUB и USD, не отдельный курс валютного провайдера.",
+    "Последнее обновление DropsTab завершилось ошибкой; сохранены данные от 2026-10-06T06:53:13.383Z."
   ],
   "usdRub": 84.82809309922419,
   "fxUpdatedAt": "2026-10-06T06:53:13.383Z",
   "fxSource": "DropsTab portfolio valuation ratio (RUB/USD)",
-  "attemptedAt": "2026-10-06T06:53:13.383Z"
+  "attemptedAt": "2026-10-06T13:45:50.272Z",
+  "error": "DropsTab refresh failed: HTTP 403 from dropstab.com"
 }
