@@ -5,10 +5,12 @@ import cs2History from '@/data/history.json';
 import sandbox from '@/data/sandbox.json';
 import crypto from '@/data/crypto.json';
 import combinedHistory from '@/data/combined-history.json';
+import priceArchive from '@/data/price-history.json';
 import { requireSession } from './auth.mjs';
 import { mergeAssetQuotes, mergeSnapshots, newer, newerLedger } from './calculations';
 import { createGithubReader, normalizeSteamSnapshot, validCombinedHistory, validExtraPortfolio, validSteamLive } from './portfolio-source';
 import type { Asset, ExtraPortfolio, PortfolioData, Snapshot } from './types';
+import { attachPriceHistory, type PriceArchive } from './price-history';
 
 const githubFile = createGithubReader();
 const VERIFIED_INVENTORY_URL = 'https://steamcommunity.com/profiles/76561199654246992/inventory/#590830';
@@ -45,8 +47,10 @@ export async function loadPortfolio(): Promise<PortfolioData> {
     return { id: `cs2:${item.name}`, class: 'cs2', name: item.name, category: item.category, quantity: item.quantity, cost: item.costKopecks / 100, averageBuyPrice: item.averageKopecks / 100, realized: item.realizedKopecks / 100, price: quote?.priceKopecks === undefined ? null : quote.priceKopecks / 100, currency: 'RUB', updatedAt: quote?.updatedAt ?? null, icon: quote?.icon, marketUrl: `https://steamcommunity.com/market/listings/730/${encodeURIComponent(item.name)}`, source: 'Steam Community Market', trades: item.trades.map(t => ({ type: t.type, date: t.date, quantity: t.quantity, unitPrice: t.unitKopecks / 100, total: t.totalKopecks / 100, fee: t.feeKopecks / 100, currency: 'RUB' })) };
   });
   const csSnapshots: Snapshot[] = (history.snapshots as CsSnapshot[]).map(normalizeSteamSnapshot);
+  const allAssets = [...assets, ...mergeAssetQuotes(sb.items, (sb === validSandbox ? localSandbox : validSandbox)?.items ?? []), ...mergeAssetQuotes(cr.items, (cr === validCrypto ? localCrypto : validCrypto)?.items ?? [])].map(asset => attachPriceHistory(asset, (priceArchive.items as Record<string, PriceArchive>)[asset.id]));
+  const cryptoAt = allAssets.filter(a => a.class === 'crypto').map(a => a.updatedAt).filter((at): at is string => at !== null).sort().at(-1) ?? cr.fetchedAt;
   return {
-    assets: [...assets, ...mergeAssetQuotes(sb.items, (sb === validSandbox ? localSandbox : validSandbox)?.items ?? []), ...mergeAssetQuotes(cr.items, (cr === validCrypto ? localCrypto : validCrypto)?.items ?? [])],
+    assets: allAssets,
     history: {
       cs2: csSnapshots,
       sandbox: mergeSnapshots(sb.snapshots, (sb === validSandbox ? localSandbox : validSandbox)?.snapshots ?? []),
@@ -62,7 +66,7 @@ export async function loadPortfolio(): Promise<PortfolioData> {
         deliveryError: liveResult.error ?? (combinedResult.error ? `Общая история: ${combinedResult.error}` : undefined),
       },
       sandbox: { name: sb.source, url: sb.sourceUrl, at: sbQuotes.fetchedAt, ledgerAt: sb.historyImport?.importedAt, attemptedAt: sbStatus.attemptedAt, error: sbStatus.error, readAt: sandboxResult.readAt, deliveryError: sandboxResult.error },
-      crypto: { name: cr.source, url: cr.sourceUrl, at: cr.fetchedAt, attemptedAt: crStatus.attemptedAt, error: crStatus.error, readAt: cryptoResult.readAt, deliveryError: cryptoResult.error },
+      crypto: { name: cr.source, url: cr.sourceUrl, at: cryptoAt, attemptedAt: crStatus.attemptedAt, error: crStatus.error, readAt: cryptoResult.readAt, deliveryError: cryptoResult.error },
     },
     usdRub: cr.usdRub ?? null, fxUpdatedAt: cr.fxUpdatedAt ?? cr.fetchedAt,
     fxSource: cr.fxSource ?? 'Курс оценки DropsTab', sandboxNotes: sb.notes, verifiedAt: sb.verifiedAt ?? null,

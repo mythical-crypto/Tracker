@@ -3,20 +3,21 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Clock3 } from 'lucide-react';
 import { comparableSnapshots, filterHistory, historyChange, periodChange, type PeriodChange } from '@/lib/calculations';
+import { chartDomain, chartSegments } from '@/lib/chart-series';
 import type { Currency, Snapshot } from '@/lib/types';
 import './chart.css';
 
-type ChartProps = { snapshots: Snapshot[]; currency: Currency; title: string; unitPrice?: boolean };
+type ChartProps = { snapshots: Snapshot[]; currency: Currency; title: string; unitPrice?: boolean; initialPeriod?: string };
 const periods = [['day', 'День'], ['week', 'Неделя'], ['month', 'Месяц'], ['year', 'Год'], ['all', 'Всё']] as const;
 const horizons = [{ days: 1, label: '24 ч' }, { days: 7, label: '7 д' }, { days: 30, label: '30 д' }] as const;
 const symbol = (currency: Currency) => currency === 'RUB' ? '₽' : '$';
 const date = (at: string | null | undefined, exact = false) => at && Number.isFinite(Date.parse(at))
-  ? new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', ...(exact ? { year: 'numeric' as const, hour: '2-digit' as const, minute: '2-digit' as const, second: '2-digit' as const } : {}), timeZone: 'Europe/Astrakhan' }).format(new Date(at))
+  ? new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', ...(exact ? { hour: '2-digit' as const, minute: '2-digit' as const, second: '2-digit' as const } : {}), timeZone: 'Europe/Astrakhan' }).format(new Date(at))
   : 'Дата неизвестна';
 const precision = (value: number, unitPrice = false) => {
   const absolute = Math.abs(value);
   const tinyDigits = absolute > 0 && absolute < .01 ? Math.min(16, Math.ceil(-Math.log10(absolute)) + 3) : 2;
-  return unitPrice ? Math.max(8, tinyDigits) : tinyDigits;
+  return unitPrice ? Math.min(16, Math.max(2, 3 - Math.floor(Math.log10(absolute || 1)))) : tinyDigits;
 };
 const amount = (value: number | null | undefined, currency: Currency, unitPrice = false) => value == null || !Number.isFinite(value) ? '—'
   : new Intl.NumberFormat('ru-RU', { style: 'currency', currency, minimumFractionDigits: unitPrice ? Math.min(2, precision(value, true)) : 0, maximumFractionDigits: precision(value, unitPrice) }).format(value);
@@ -44,10 +45,10 @@ export function PeriodSummary({ snapshots, currency, unitPrice = false }: Omit<C
   </section>;
 }
 
-export default function HistoryChart({ snapshots, currency, title, unitPrice = false }: ChartProps) {
-  const [period, setPeriod] = useState('month');
+export default function HistoryChart({ snapshots, currency, title, unitPrice = false, initialPeriod }: ChartProps) {
+  const [period, setPeriod] = useState(initialPeriod ?? (unitPrice ? 'year' : 'month'));
   const [selected, setSelected] = useState<number | null>(null);
-  const [showCost, setShowCost] = useState(true);
+  const [showCost, setShowCost] = useState(false);
   const [width, setWidth] = useState(900);
   const plotRef = useRef<HTMLDivElement>(null);
   const uid = useId();
@@ -70,33 +71,26 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
   }, [data.length > 0]);
 
   const values = data.flatMap(snapshot => visibleCost && snapshot.cost !== null && Number.isFinite(snapshot.cost) ? [snapshot.value, snapshot.cost] : [snapshot.value]);
-  const low = values.length ? Math.min(...values) : 0, high = values.length ? Math.max(...values) : 1;
-  const padding = Math.max((high - low) * .15, Math.abs(high) * .015, high === 0 ? 1 : Number.EPSILON);
-  const min = low >= 0 ? Math.max(0, low - padding) : low - padding, max = high + padding;
+  const { min, max } = chartDomain(values);
   const ticks = [0, 1, 2, 3, 4].map(index => max - index * (max - min) / 4);
-  const axisNumber = (value: number) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: unitPrice ? currency === 'RUB' ? 2 : precision(value, true) : Math.abs(max) < 1 ? precision(value, true) : 0 }).format(value);
+  const tickDigits = Math.min(16, Math.max(0, 1 - Math.floor(Math.log10((max - min) / 4))));
+  const axisNumber = (value: number) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: tickDigits }).format(value);
   const axisLabels = ticks.map(value => `${axisNumber(value)} ${symbol(currency)}`);
   const left = Math.min(Math.max(64, Math.max(...axisLabels.map(label => label.length)) * 6.6 + 12), width * .4);
   const right = width - 18, top = 32, bottom = height - 29;
   const start = first ? Date.parse(first.at) : 0, end = last ? Date.parse(last.at) : 1;
   const x = (snapshot: Snapshot) => data.length === 1 ? (left + right) / 2 : left + (Date.parse(snapshot.at) - start) / Math.max(end - start, 1) * (right - left);
-  const y = (value: number) => bottom - (value - min) / Math.max(max - min, Number.EPSILON) * (bottom - top);
-  const line = (key: 'value' | 'cost') => data.map((snapshot, index) => {
-    const value = snapshot[key];
-    if (value === null || !Number.isFinite(value)) return '';
-    const previous = data[index - 1];
-    const separate = !previous || previous[key] === null || !Number.isFinite(previous[key])
-      || (key === 'value' ? !comparableSnapshots(snapshot, previous) : snapshot.costCoverageKey !== previous.costCoverageKey)
-      || Date.parse(snapshot.at) - Date.parse(previous.at) > 3 * 86400000;
-    return `${separate ? 'M' : 'L'}${x(snapshot)},${y(value)}`;
-  }).join(' ');
+  const y = (value: number) => bottom - (value - min) / (max - min) * (bottom - top);
+  const line = (key: 'value' | 'cost') => chartSegments(data, key).map(segment => segment.map((snapshot, i) => `${i ? 'L' : 'M'}${x(snapshot)},${y(snapshot[key]!)}`).join(' ')).join(' ');
+  const area = chartSegments(data).filter(segment => segment.length > 1).map(segment => `M${x(segment[0])},${bottom} ${segment.map(snapshot => `L${x(snapshot)},${y(snapshot.value)}`).join(' ')} L${x(segment.at(-1)!)},${bottom} Z`).join(' ');
   const dateTicks = data.length === 1 ? [{ x: x(first), at: first.at }] : [0, .25, .5, .75, 1].filter((_, index) => width >= 600 || index % 2 === 0).map(ratio => ({ x: left + ratio * (right - left), at: new Date(start + ratio * (end - start)).toISOString() }));
-  const axisDate = (at: string) => new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', ...(end - start < 86400000 && data.length > 1 ? { hour: '2-digit' as const, minute: '2-digit' as const } : {}), timeZone: 'Europe/Astrakhan' }).format(new Date(at));
+  const axisDate = (at: string) => new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', ...(end - start > 180 * 86400000 ? { year: '2-digit' as const } : {}), ...(end - start < 86400000 && data.length > 1 ? { hour: '2-digit' as const, minute: '2-digit' as const } : {}), timeZone: 'Europe/Astrakhan' }).format(new Date(at));
   const stale = last && Date.now() - Date.parse(last.at) > 3600000;
 
   return <div className={`hc-chart${unitPrice ? ' hc-unit' : ''}`}>
     <div className="hc-toolbar"><h2>{title}</h2><div className="hc-periods" role="group" aria-label="Период графика">{periods.map(([id, label]) => <button key={id} type="button" aria-pressed={period === id} onClick={() => { setPeriod(id); setSelected(null); }}>{label}</button>)}</div></div>
-    <div className="hc-legend"><span><i className="hc-value-swatch"/>{unitPrice ? 'Цена единицы' : 'Стоимость'}</span>{hasCost && <button type="button" aria-pressed={showCost} onClick={() => setShowCost(current => !current)}><i className="hc-cost-swatch"/>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}</button>}</div>
+    <div className="hc-headline"><strong>{amount(last?.value, currency, unitPrice)}</strong><span className={tone(change)}>{signed(change, currency, unitPrice)}<small> за доступный период</small></span></div>
+    <div className="hc-legend"><span><i className="hc-value-swatch"/>{unitPrice ? 'Цена единицы' : 'Рыночная стоимость'}</span>{hasCost && <button type="button" aria-pressed={showCost} onClick={() => setShowCost(current => !current)}><i className="hc-cost-swatch"/>{unitPrice ? 'Средняя покупка' : 'Показать вложения'}</button>}</div>
     {data.length ? <>
       <div ref={plotRef} className="hc-plot" style={{ height }} role="group" aria-label={title} aria-describedby={`${uid}-keyboard`} tabIndex={0} onKeyDown={event => {
         if (['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) {
@@ -114,11 +108,12 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
           {ticks.map((value, index) => <g key={index}><line x1={left} x2={right} y1={y(value)} y2={y(value)} className="hc-grid"/><text x={left - 10} y={y(value) + 4} textAnchor="end" className="hc-axis">{axisLabels[index]}</text></g>)}
           {dateTicks.map((tick, index) => <g key={index}><line x1={tick.x} x2={tick.x} y1={top} y2={bottom} className="hc-grid"/><text x={tick.x} y={height - 8} textAnchor={data.length === 1 ? 'middle' : index === 0 ? 'start' : index === dateTicks.length - 1 ? 'end' : 'middle'} className="hc-axis">{axisDate(tick.at)}</text></g>)}
           <line x1={left} x2={right} y1={bottom} y2={bottom} className="hc-baseline"/>
-          {data.length > 1 && <><path d={line('value')} className="hc-value-line"/>{visibleCost && <path d={line('cost')} className="hc-cost-line"/>}</>}
+          <defs><linearGradient id={`${uid}-fill`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--accent)" stopOpacity=".16"/><stop offset="100%" stopColor="var(--accent)" stopOpacity=".015"/></linearGradient></defs>
+          {data.length > 1 && <><path d={area} fill={`url(#${uid}-fill)`} className="hc-area"/><path d={line('value')} className="hc-value-line"/>{visibleCost && <path d={line('cost')} className="hc-cost-line"/>}</>}
           {highlighted && <line x1={x(highlighted)} x2={x(highlighted)} y1={top} y2={bottom} className="hc-guide"/>}
           {data.map((snapshot, index) => <g key={`${snapshot.at}-${index}`}>
             {visibleCost && snapshot.cost !== null && Number.isFinite(snapshot.cost) && <circle cx={x(snapshot)} cy={y(snapshot.cost)} r={index === active ? 4 : 2.5} className="hc-cost-point"><title>{`${date(snapshot.at, true)} · ${unitPrice ? 'Средняя покупка' : 'Себестоимость'}: ${amount(snapshot.cost, currency, unitPrice)}`}</title></circle>}
-            <circle cx={x(snapshot)} cy={y(snapshot.value)} r={index === active || data.length === 1 ? 4.5 : 2.5} className="hc-value-point"><title>{`${date(snapshot.at, true)} · ${amount(snapshot.value, currency, unitPrice)}`}</title></circle>
+            {(data.length < 60 || index === active || index === 0 || !comparableSnapshots(snapshot, data[index - 1])) && <circle cx={x(snapshot)} cy={y(snapshot.value)} r={index === active || data.length === 1 ? 4.5 : 2.5} className="hc-value-point"><title>{`${date(snapshot.at, true)} · ${amount(snapshot.value, currency, unitPrice)}`}</title></circle>}
           </g>)}
         </svg>
         <div className="hc-readout" aria-live="polite"><span>{date(highlighted?.at, true)}</span><strong>{amount(highlighted?.value, currency, unitPrice)}</strong>{visibleCost && highlighted?.cost != null && <small>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}: {amount(highlighted.cost, currency, unitPrice)}</small>}</div>

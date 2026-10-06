@@ -13,6 +13,7 @@
     "prices:update": "node scripts/update-prices.mjs",
     "extras:update": "node scripts/update-extras.mjs",
     "history:record": "node scripts/record-total.mjs",
+    "history:backfill": "node scripts/backfill-price-history.mjs",
     "hindsight:start": "node scripts/hindsight-start.mjs"
   },
   "dependencies": {

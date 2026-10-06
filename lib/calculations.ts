@@ -90,7 +90,8 @@ export function assetPriceHistory(asset: Asset, snapshots: Snapshot[], now = Dat
     return [{ at: quoteAt ?? snapshot.at, value: price, cost: null, complete: true, coverageKey: asset.id, quantityKey: `${asset.id}:1`, pricedCount: 1, totalCount: 1 } satisfies Snapshot];
   });
   if (asset.price !== null && Number.isFinite(asset.price) && asset.price >= 0 && asset.updatedAt) observations.push({ at: asset.updatedAt, value: asset.price, cost: null, complete: true, coverageKey: asset.id, quantityKey: `${asset.id}:1`, pricedCount: 1, totalCount: 1 });
-  return mergeSnapshots([], filterHistory(observations, 'all', now));
+  // Source archives contain unit prices, never past holdings or invented valuations.
+  return mergeSnapshots(filterHistory(observations, 'all', now), filterHistory(asset.priceHistory ?? [], 'all', now));
 }
 
 export function assetPnl(asset: Asset, usdRub: number | null, native = false): number | null {
