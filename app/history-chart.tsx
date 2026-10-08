@@ -58,7 +58,7 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
   const visibleCost = hasCost && showCost;
   const active = selected !== null && selected < data.length ? selected : data.length - 1;
   const highlighted = data[active];
-  const height = unitPrice ? 202 : 246;
+  const height = unitPrice ? 202 : 206;
 
   useEffect(() => {
     const node = plotRef.current;
@@ -89,7 +89,9 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
 
   return <div className={`hc-chart${unitPrice ? ' hc-unit' : ''}`}>
     <div className="hc-toolbar"><h2>{title}</h2><div className="hc-periods" role="group" aria-label="Период графика">{periods.map(([id, label]) => <button key={id} type="button" aria-pressed={period === id} onClick={() => { setPeriod(id); setSelected(null); }}>{label}</button>)}</div></div>
-    <div className="hc-headline"><strong>{amount(last?.value, currency, unitPrice)}</strong><span className={tone(change)}>{signed(change, currency, unitPrice)}<small> за доступный период</small></span></div>
+    {data.length > 0 && <p className="hc-coverage">Доступная история: {date(first.at)}{data.length > 1 && ` — ${date(last!.at)}`}</p>}
+    <div className="hc-headline"><strong>{amount(last?.value, currency, unitPrice)}</strong>{change !== null ? <span className={tone(change)}>{signed(change, currency, unitPrice)}<small> за доступный период</small></span> : data.length > 1 && <span className="hc-muted">Состав или покрытие менялись</span>}</div>
+    {!unitPrice && last && <p className="hc-value-context">На последнем снимке · {date(last.at, true)}</p>}
     <div className="hc-legend"><span><i className="hc-value-swatch"/>{unitPrice ? 'Цена единицы' : 'Рыночная стоимость'}</span>{hasCost && <button type="button" aria-pressed={showCost} onClick={() => setShowCost(current => !current)}><i className="hc-cost-swatch"/>{unitPrice ? 'Средняя покупка' : 'Показать вложения'}</button>}</div>
     {data.length ? <>
       <div ref={plotRef} className="hc-plot" style={{ height }} role="group" aria-label={title} aria-describedby={`${uid}-keyboard`} tabIndex={0} onKeyDown={event => {
@@ -119,10 +121,11 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
         <div className="hc-readout" aria-live="polite"><span>{date(highlighted?.at, true)}</span><strong>{amount(highlighted?.value, currency, unitPrice)}</strong>{visibleCost && highlighted?.cost != null && <small>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}: {amount(highlighted.cost, currency, unitPrice)}</small>}</div>
       </div>
       <p id={`${uid}-keyboard`} className="hc-sr-only">Выберите снимок стрелками влево и вправо. Home — первый снимок, End — последний. Все значения доступны в таблице ниже.</p>
-      <div className="hc-caption"><span>{data.length === 1 ? 'Один снимок · линия появится после следующего сопоставимого наблюдения' : `${data.length} снимков · ${date(first.at)} — ${date(last!.at)}`}</span>{data.length > 1 && <span className={tone(change)}>{signed(change, currency, unitPrice)} <span className="hc-muted">за доступный интервал</span></span>}{stale && <span>Последний снимок устарел</span>}</div>
+      {unitPrice && <div className="hc-range" aria-label="Диапазон наблюдаемых цен"><span>Минимум в периоде<strong>{amount(Math.min(...data.map(s => s.value)), currency, true)}</strong></span><span>Максимум в периоде<strong>{amount(Math.max(...data.map(s => s.value)), currency, true)}</strong></span><span>Наблюдений<strong>{data.length}</strong></span></div>}
+      <div className="hc-caption"><span>{data.length === 1 ? 'Один снимок · линия появится после следующего сопоставимого наблюдения' : `${data.length} реальных снимков`}</span>{stale && <span>Последний снимок устарел</span>}</div>
       {!last!.complete && <p className="hc-note">Оценена часть портфеля{last!.pricedCount != null && last!.totalCount != null ? `: ${last!.pricedCount} из ${last!.totalCount} позиций` : ''}.</p>}
       {visibleCost && last!.costComplete === false && <p className="hc-note">Себестоимость известна частично{last!.knownCostCount != null && last!.totalCount != null ? `: ${last!.knownCostCount} из ${last!.totalCount} позиций` : ''}.</p>}
-      {data.length > 1 && change === null && <p className="hc-note">Изменение несопоставимо: менялись остатки или покрытие оценки либо их состав не записан. Линия прервана между несопоставимыми снимками.</p>}
+      {data.length > 1 && change === null && <details className="hc-note"><summary>Состав или покрытие оценки менялись</summary><p>Изменение несопоставимо: менялись остатки или покрытие оценки либо их состав не записан. Линия прервана между несопоставимыми снимками.</p></details>}
       <details className="hc-data"><summary>Значения графика</summary><div className="hc-table-scroll"><table><caption className="hc-sr-only">{title}, {symbol(currency)}{unitPrice ? ' за единицу' : ''}</caption><thead><tr><th>Дата снимка</th><th>{unitPrice ? 'Цена единицы' : 'Стоимость'}</th>{hasCost && <th>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}</th>}</tr></thead><tbody>{data.map((snapshot, index) => <tr key={`${snapshot.at}-${index}`}><td>{date(snapshot.at, true)}</td><td>{amount(snapshot.value, currency, unitPrice)}{!snapshot.complete && <small>Частичная оценка{snapshot.pricedCount != null && snapshot.totalCount != null ? `: ${snapshot.pricedCount}/${snapshot.totalCount}` : ''}</small>}</td>{hasCost && <td>{amount(snapshot.cost, currency, unitPrice)}{snapshot.cost === null ? <small>Нет данных</small> : snapshot.costComplete === false && <small>Себестоимость известна частично</small>}</td>}</tr>)}</tbody></table></div></details>
     </> : <div className="hc-empty"><Clock3 size={24}/><strong>За этот период нет снимков</strong><p>{snapshots.length ? 'Выберите «Всё», чтобы увидеть доступную историю.' : 'История появится после обновления цен. Операции доступны на отдельной вкладке.'}</p></div>}
   </div>;
