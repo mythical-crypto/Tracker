@@ -672,10 +672,11 @@
         {
           "id": "14926354",
           "type": "buy",
+          "purpose": "AIRDROP",
           "date": "2025-02-21T15:56:08.433Z",
           "quantity": 130,
           "unitPrice": 0.077762,
-          "total": 10.10906,
+          "total": 0,
           "fee": 0,
           "feeQuantity": 0,
           "feeType": "PERCENT",

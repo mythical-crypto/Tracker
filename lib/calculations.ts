@@ -2,12 +2,13 @@ import type { Asset, AssetClass, Currency, PortfolioData, Snapshot } from './typ
 
 export function convert(value: number | null, currency: Currency, usdRub: number | null): number | null {
   if (value === null || !Number.isFinite(value)) return null;
+  if (value === 0) return 0;
   return currency === 'RUB' ? value : usdRub && Number.isFinite(usdRub) && usdRub > 0 ? value * usdRub : null;
 }
 export function summarize(assets: Asset[], usdRub: number | null, native = false) {
   let value = 0, cost = 0, pnl = 0, realized = 0, priced = 0, knownCost = 0, comparable = 0, comparableCount = 0, realizedKnownCount = 0;
   for (const item of assets) {
-    const amount = item.price === null ? null : item.price * item.quantity;
+    const amount = item.quantity === 0 ? 0 : item.price === null ? null : item.price * item.quantity;
     const v = native ? amount : convert(amount, item.currency, usdRub);
     const c = native ? item.cost : convert(item.cost, item.currency, usdRub);
     if (v !== null && Number.isFinite(v)) { value += v; priced++; }
@@ -28,6 +29,12 @@ export function newer<T>(local: T, incoming: T | null | undefined, date: (value:
   const incomingTime = Date.parse(date(incoming) ?? '');
   const localTime = Date.parse(date(local) ?? '');
   return Number.isFinite(incomingTime) && (!Number.isFinite(localTime) || incomingTime > localTime) ? incoming : local;
+}
+
+export function newerFx<T extends { usdRub?: number | null }>(local: T, incoming: T | null | undefined, date: (value: T) => string | null | undefined): T {
+  const hasRate = (value: T) => typeof value.usdRub === 'number' && Number.isFinite(value.usdRub) && value.usdRub > 0;
+  if (!incoming || !hasRate(incoming)) return local;
+  return hasRate(local) ? newer(local, incoming, date) : incoming;
 }
 
 export function newerLedger<T>(local: T, incoming: T | null | undefined, ledgerDate: (value: T) => string | null | undefined, quoteDate: (value: T) => string | null | undefined): T {
@@ -95,7 +102,8 @@ export function assetPriceHistory(asset: Asset, snapshots: Snapshot[], now = Dat
 }
 
 export function assetPnl(asset: Asset, usdRub: number | null, native = false): number | null {
-  const value = asset.price === null || asset.cost === null ? null : asset.price * asset.quantity - asset.cost;
+  const amount = asset.quantity === 0 ? 0 : asset.price === null ? null : asset.price * asset.quantity;
+  const value = amount === null || asset.cost === null ? null : amount - asset.cost;
   return value === null || !Number.isFinite(value) ? null : native ? value : convert(value, asset.currency, usdRub);
 }
 
@@ -103,16 +111,18 @@ export function mergeAssetQuotes(preferred: Asset[], other: Asset[]): Asset[] {
   const alternatives = new Map(other.map(a => [a.id, a]));
   return preferred.map(asset => {
     const alternate = alternatives.get(asset.id);
-    if (!alternate || alternate.currency !== asset.currency || alternate.class !== asset.class) return asset;
+    if (!alternate || alternate.currency !== asset.currency || alternate.class !== asset.class || alternate.source !== asset.source) return asset;
     const quote = newer(asset, alternate, a => a.updatedAt);
-    return { ...asset, price: quote.price, updatedAt: quote.updatedAt, icon: quote.icon ?? asset.icon };
+    return { ...asset, price: quote.price, updatedAt: quote.updatedAt, icon: quote.icon ?? asset.icon, ...(asset.priceHistory || alternate.priceHistory ? { priceHistory: mergeSnapshots(asset.priceHistory ?? [], alternate.priceHistory ?? []) } : {}) };
   });
 }
 
 export function mergePortfolio(current: PortfolioData, incoming: PortfolioData): PortfolioData {
-  const selected = Object.fromEntries((['cs2', 'sandbox', 'crypto'] as AssetClass[]).map(id => [id, id === 'sandbox' ? newerLedger(current, incoming, p => p.sources.sandbox.ledgerAt, p => p.sources.sandbox.at) : newer(current, incoming, p => p.sources[id].at)])) as Record<AssetClass, PortfolioData>;
+  const selected = Object.fromEntries((['cs2', 'sandbox', 'crypto'] as AssetClass[]).map(id => [id, id === 'cs2' ? newer(current, incoming, p => p.sources[id].at) : newerLedger(current, incoming, p => p.sources[id].ledgerAt, p => p.sources[id].at)])) as Record<AssetClass, PortfolioData>;
+  const fx = newerFx(current, incoming, p => p.fxUpdatedAt ?? p.sources.crypto.at);
   return {
     ...selected.crypto,
+    usdRub: fx.usdRub, fxUpdatedAt: fx.fxUpdatedAt, fxSource: fx.fxSource,
     assets: mergeAssetQuotes((['cs2', 'sandbox', 'crypto'] as AssetClass[]).flatMap(id => selected[id].assets.filter(a => a.class === id)), mergeAssetQuotes(current.assets, incoming.assets)),
     sources: Object.fromEntries((['cs2', 'sandbox', 'crypto'] as AssetClass[]).map(id => {
       const status = newer(current.sources[id], incoming.sources[id], s => s.attemptedAt ?? s.at);

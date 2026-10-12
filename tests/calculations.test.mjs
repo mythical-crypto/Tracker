@@ -61,6 +61,32 @@ test('unknown totals remain unknown while actual zero-cost positions retain thei
   assert.equal(free.cost, 0);
 });
 
+test('closed positions have zero market value and unrealized result without a current quote', () => {
+  const closed = { quantity: 0, price: null, cost: 0, realized: 12, currency: 'RUB' };
+  assert.equal(assetPnl(closed, null), 0);
+  const summary = summarize([closed], null);
+  assert.equal(summary.value, 0);
+  assert.equal(summary.pnl, 0);
+  assert.equal(summary.realized, 12);
+  assert.equal(summary.priced, 1);
+  assert.equal(summary.complete, true);
+  assert.equal(assetPnl({ ...closed, cost: null }, null), null);
+});
+
+test('zero USD positions remain zero without FX while nonzero sales results remain unknown', () => {
+  const closed = { quantity: 0, price: null, cost: 0, realized: 12, currency: 'USD' };
+  assert.equal(convert(0, 'USD', null), 0);
+  assert.equal(assetPnl(closed, null), 0);
+  const summary = summarize([closed], null);
+  assert.equal(summary.value, 0);
+  assert.equal(summary.cost, 0);
+  assert.equal(summary.pnl, 0);
+  assert.equal(summary.realized, null);
+  assert.equal(summary.complete, true);
+  assert.equal(convert(-12, 'USD', null), null);
+  assert.equal(convert(12, 'USD', null), null);
+});
+
 const comparisonNow = Date.parse('2026-10-05T10:00:00Z');
 const observed = (at, value = 100, extra = {}) => ({ at, value, cost: 70, complete: true, coverageKey: 'a', quantityKey: 'a:2', ...extra });
 
@@ -149,6 +175,19 @@ test('partial source refresh preserves newer individual quotes while applying th
   assert.equal(newer(currentStatus, failedStatus, s => s.attemptedAt).error, 'Unavailable');
 });
 
+test('quote merging preserves incoming price history even when the current quote has not changed', () => {
+  const previous = { at: '2026-10-04T10:00:00Z', value: 20, cost: null, complete: true, source: 'Steam Community Market' };
+  const latest = { ...previous, at: '2026-10-05T10:00:00Z', value: 30 };
+  const currentAsset = { id: 'A', class: 'sandbox', currency: 'RUB', source: 'Steam Community Market', quantity: 2, cost: 50, price: 30, updatedAt: latest.at, priceHistory: [latest] };
+  const incomingAsset = { ...currentAsset, priceHistory: [previous, latest] };
+  assert.deepEqual(mergeAssetQuotes([currentAsset], [incomingAsset])[0].priceHistory, [previous, latest]);
+  assert.deepEqual(mergeAssetQuotes([currentAsset], [{ ...incomingAsset, source: 'another source' }])[0].priceHistory, [latest]);
+
+  const status = { at: latest.at };
+  const current = { assets: [currentAsset], sources: { cs2: status, sandbox: status, crypto: status }, history: { cs2: [], sandbox: [], crypto: [] }, combinedHistory: [] };
+  assert.deepEqual(mergePortfolio(current, { ...current, assets: [incomingAsset] }).assets[0].priceHistory, [previous, latest]);
+});
+
 test('delivery errors refresh and clear independently of quote and source attempt dates', () => {
   const snapshot = observed('2026-10-05T10:00:00Z');
   const status = { at: snapshot.at, attemptedAt: snapshot.at, readAt: snapshot.at, error: 'Steam failed' };
@@ -161,4 +200,44 @@ test('delivery errors refresh and clear independently of quote and source attemp
   const cleared = mergePortfolio(merged, { ...incoming, sources: { ...incoming.sources, cs2: { ...status, readAt: '2026-10-05T10:10:00Z' } } });
   assert.equal(cleared.sources.cs2.deliveryError, undefined);
   assert.equal(cleared.sources.cs2.error, 'Steam failed');
+});
+
+test('FX freshness is independent of crypto quote freshness and a missing rate preserves the known rate', () => {
+  const status = { at: '2026-10-05T10:00:00Z' };
+  const current = { assets: [], sources: { cs2: status, sandbox: status, crypto: status }, history: { cs2: [], sandbox: [], crypto: [] }, combinedHistory: [], usdRub: 80, fxUpdatedAt: '2026-10-05T10:00:00Z', fxSource: 'current rate' };
+  const freshFx = { ...current, usdRub: 85, fxUpdatedAt: '2026-10-05T11:00:00Z', fxSource: 'new rate' };
+  assert.equal(mergePortfolio(current, freshFx).usdRub, 85);
+  assert.equal(mergePortfolio(current, freshFx).fxUpdatedAt, freshFx.fxUpdatedAt);
+  assert.equal(mergePortfolio(current, freshFx).fxSource, 'new rate');
+
+  const freshQuoteOldFx = { ...current, sources: { ...current.sources, crypto: { at: '2026-10-05T12:00:00Z' } }, usdRub: 70, fxUpdatedAt: '2026-10-05T09:00:00Z' };
+  assert.equal(mergePortfolio(current, freshQuoteOldFx).usdRub, 80);
+  const missingFx = { ...freshQuoteOldFx, usdRub: null, fxUpdatedAt: null };
+  assert.equal(mergePortfolio(current, missingFx).usdRub, 80);
+  assert.equal(mergePortfolio({ ...current, usdRub: null, fxUpdatedAt: null }, freshFx).usdRub, 85);
+});
+
+test('fresh crypto accounting updates quantity, cost and operations while retaining older available quotes and FX', () => {
+  const at = '2026-10-05T10:00:00Z';
+  const status = { at };
+  const position = { id: 'coin', class: 'crypto', currency: 'USD', source: 'DropsTab', quantity: 2, cost: 50, realized: 0, price: 30, updatedAt: at, trades: [] };
+  const current = { assets: [position], sources: { cs2: status, sandbox: status, crypto: { ...status, ledgerAt: at } }, history: { cs2: [], sandbox: [], crypto: [] }, combinedHistory: [], usdRub: 80, fxUpdatedAt: at, fxSource: 'known rate' };
+  const incomingPosition = { ...position, quantity: 1, cost: 25, realized: 5, price: null, updatedAt: null, trades: [{ type: 'sell', quantity: 1, total: 30 }] };
+  const incoming = { ...current, assets: [incomingPosition], sources: { ...current.sources, crypto: { at: null, ledgerAt: '2026-10-05T11:00:00Z' } }, usdRub: null, fxUpdatedAt: null };
+  const merged = mergePortfolio(current, incoming);
+  assert.equal(merged.assets[0].quantity, 1);
+  assert.equal(merged.assets[0].cost, 25);
+  assert.equal(merged.assets[0].realized, 5);
+  assert.deepEqual(merged.assets[0].trades, incomingPosition.trades);
+  assert.equal(merged.assets[0].price, 30);
+  assert.equal(merged.assets[0].updatedAt, at);
+  assert.equal(merged.sources.crypto.at, at);
+  assert.equal(merged.sources.crypto.ledgerAt, incoming.sources.crypto.ledgerAt);
+  assert.equal(merged.usdRub, 80);
+  assert.equal(summarize(merged.assets, merged.usdRub).value, 2400);
+
+  const closed = mergePortfolio(merged, { ...incoming, assets: [{ ...incomingPosition, quantity: 0, cost: 0, realized: 12 }], sources: { ...incoming.sources, crypto: { at: null, ledgerAt: '2026-10-05T12:00:00Z' } } });
+  assert.equal(closed.assets[0].quantity, 0);
+  assert.equal(summarize(closed.assets, closed.usdRub).value, 0);
+  assert.equal(summarize(closed.assets, closed.usdRub).realized, 960);
 });

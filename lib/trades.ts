@@ -1,5 +1,13 @@
 import type { Trade } from './types';
 
+export function tradeKind(trade: Trade): string {
+  return trade.type === 'buy' && trade.purpose === 'AIRDROP' ? 'airdrop' : trade.type;
+}
+
+export function tradeLabel(trade: Trade): string {
+  return tradeKind(trade) === 'airdrop' ? 'Airdrop' : trade.type === 'buy' ? 'Покупка' : trade.type === 'sell' ? 'Продажа' : trade.type;
+}
+
 export function tradeDate(trade: Trade): string {
   if (!trade.date) return trade.dateLabel ? `${trade.dateLabel} · год неизвестен` : 'Дата неизвестна';
   return new Intl.DateTimeFormat('ru-RU', {

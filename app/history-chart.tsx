@@ -2,8 +2,8 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Clock3 } from 'lucide-react';
-import { comparableSnapshots, filterHistory, historyChange, periodChange, type PeriodChange } from '@/lib/calculations';
-import { chartDomain, chartSegments } from '@/lib/chart-series';
+import { filterHistory, historyChange, periodChange, type PeriodChange } from '@/lib/calculations';
+import { chartBoundaryPoints, chartDomain, chartSegments } from '@/lib/chart-series';
 import type { Currency, Snapshot } from '@/lib/types';
 import './chart.css';
 
@@ -53,6 +53,7 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
   const plotRef = useRef<HTMLDivElement>(null);
   const uid = useId();
   const data = useMemo(() => filterHistory(snapshots, period), [snapshots, period]);
+  const boundaryPoints = useMemo(() => chartBoundaryPoints(data), [data]);
   const first = data[0], last = data.at(-1), change = historyChange(data);
   const hasCost = data.some(snapshot => snapshot.cost !== null && Number.isFinite(snapshot.cost));
   const visibleCost = hasCost && showCost;
@@ -115,7 +116,7 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
           {highlighted && <line x1={x(highlighted)} x2={x(highlighted)} y1={top} y2={bottom} className="hc-guide"/>}
           {data.map((snapshot, index) => <g key={`${snapshot.at}-${index}`}>
             {visibleCost && snapshot.cost !== null && Number.isFinite(snapshot.cost) && <circle cx={x(snapshot)} cy={y(snapshot.cost)} r={index === active ? 4 : 2.5} className="hc-cost-point"><title>{`${date(snapshot.at, true)} · ${unitPrice ? 'Средняя покупка' : 'Себестоимость'}: ${amount(snapshot.cost, currency, unitPrice)}`}</title></circle>}
-            {(data.length < 60 || index === active || index === 0 || !comparableSnapshots(snapshot, data[index - 1])) && <circle cx={x(snapshot)} cy={y(snapshot.value)} r={index === active || data.length === 1 ? 4.5 : 2.5} className="hc-value-point"><title>{`${date(snapshot.at, true)} · ${amount(snapshot.value, currency, unitPrice)}`}</title></circle>}
+            {(data.length < 60 || index === active || boundaryPoints.has(snapshot)) && <circle cx={x(snapshot)} cy={y(snapshot.value)} r={index === active || data.length === 1 ? 4.5 : 2.5} className="hc-value-point"><title>{`${date(snapshot.at, true)} · ${amount(snapshot.value, currency, unitPrice)}`}</title></circle>}
           </g>)}
         </svg>
         <div className="hc-readout" aria-live="polite"><span>{date(highlighted?.at, true)}</span><strong>{amount(highlighted?.value, currency, unitPrice)}</strong>{visibleCost && highlighted?.cost != null && <small>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}: {amount(highlighted.cost, currency, unitPrice)}</small>}</div>

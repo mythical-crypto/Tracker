@@ -62,6 +62,17 @@ function numericMap(value: unknown): boolean {
 function dateMap(value: unknown): boolean {
   return value === undefined || (record(value) && Object.values(value).every(date));
 }
+
+export function mergeSteamPriceItems<T extends { priceKopecks?: number; updatedAt?: string }>(preferred: Record<string, T>, other: Record<string, T> = {}): Record<string, T> {
+  return Object.fromEntries(Object.keys({ ...other, ...preferred }).map(name => {
+    const quote = preferred[name];
+    const alternate = other[name];
+    if (!quote) return [name, alternate];
+    const at = Date.parse(quote.updatedAt ?? '');
+    const alternateAt = Date.parse(alternate?.updatedAt ?? '');
+    return [name, alternate?.priceKopecks !== undefined && (quote.priceKopecks === undefined || (Number.isFinite(alternateAt) && (!Number.isFinite(at) || alternateAt > at))) ? alternate : quote];
+  }));
+}
 export function validSnapshots(value: unknown): value is Snapshot[] {
   return Array.isArray(value) && value.every(s => record(s) && date(s.at)
     && typeof s.value === 'number' && Number.isFinite(s.value) && s.value >= 0
@@ -77,6 +88,7 @@ export function validExtraPortfolio(value: unknown, kind: 'sandbox' | 'crypto'):
     || typeof value.sourceUrl !== 'string' || !Array.isArray(value.items) || !validSnapshots(value.snapshots)
     || !Array.isArray(value.notes) || !value.notes.every(v => typeof v === 'string')) return false;
   if (value.usdRub !== undefined && (typeof value.usdRub !== 'number' || !Number.isFinite(value.usdRub) || value.usdRub <= 0)) return false;
+  if (value.ledgerUpdatedAt !== undefined && !date(value.ledgerUpdatedAt)) return false;
   const ids = new Set<string>();
   return value.items.every((a: unknown): a is Asset => {
     if (!record(a) || a.class !== kind || a.currency !== currency || typeof a.id !== 'string' || ids.has(a.id)

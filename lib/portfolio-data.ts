@@ -7,8 +7,8 @@ import crypto from '@/data/crypto.json';
 import combinedHistory from '@/data/combined-history.json';
 import priceArchive from '@/data/price-history.json';
 import { requireSession } from './auth.mjs';
-import { mergeAssetQuotes, mergeSnapshots, newer, newerLedger } from './calculations';
-import { createGithubReader, normalizeSteamSnapshot, validCombinedHistory, validExtraPortfolio, validSteamLive } from './portfolio-source';
+import { mergeAssetQuotes, mergeSnapshots, newer, newerFx, newerLedger } from './calculations';
+import { createGithubReader, mergeSteamPriceItems, normalizeSteamSnapshot, validCombinedHistory, validExtraPortfolio, validSteamLive } from './portfolio-source';
 import type { Asset, ExtraPortfolio, PortfolioData, Snapshot } from './types';
 import { attachPriceHistory, type PriceArchive } from './price-history';
 
@@ -31,14 +31,15 @@ export async function loadPortfolio(): Promise<PortfolioData> {
   const live = liveResult.data as { prices: typeof cs2Prices; history: { snapshots: CsSnapshot[] } } | null;
   const remotePrices = live?.prices ?? null;
   const latestPrices = newer(cs2Prices, remotePrices, p => p.lastSuccessAt);
-  const prices = { ...latestPrices, items: Object.fromEntries(Object.entries(latestPrices.items).map(([name, quote]) => [name, newer(quote, (latestPrices === remotePrices ? cs2Prices : remotePrices)?.items[name as keyof typeof cs2Prices.items], q => q.updatedAt)])) as typeof cs2Prices.items };
+  const prices = { ...latestPrices, items: mergeSteamPriceItems(latestPrices.items, (latestPrices === remotePrices ? cs2Prices : remotePrices)?.items) as typeof cs2Prices.items };
   const history = { snapshots: mergeSnapshots(cs2History.snapshots, Array.isArray(live?.history?.snapshots) ? live.history.snapshots : []) };
   const validSandbox = sandboxResult.data;
   const validCrypto = cryptoResult.data;
   const localSandbox = sandbox as ExtraPortfolio, localCrypto = crypto as ExtraPortfolio;
   const sb = newerLedger(localSandbox, validSandbox, p => p.historyImport?.importedAt, p => p.fetchedAt);
   const sbQuotes = newer(localSandbox, validSandbox, p => p.fetchedAt);
-  const cr = newer(localCrypto, validCrypto, p => p.fetchedAt);
+  const cr = newerLedger(localCrypto, validCrypto, p => p.ledgerUpdatedAt ?? p.fetchedAt, p => p.fetchedAt);
+  const fx = newerFx(localCrypto, validCrypto, p => p.fxUpdatedAt ?? p.fetchedAt);
   const sbStatus = newer(localSandbox, validSandbox, p => p.attemptedAt ?? p.fetchedAt);
   const crStatus = newer(localCrypto, validCrypto, p => p.attemptedAt ?? p.fetchedAt);
   const csStatus = newer(cs2Prices, remotePrices, p => p.lastAttemptAt);
@@ -66,10 +67,10 @@ export async function loadPortfolio(): Promise<PortfolioData> {
         deliveryError: liveResult.error ?? (combinedResult.error ? `Общая история: ${combinedResult.error}` : undefined),
       },
       sandbox: { name: sb.source, url: sb.sourceUrl, at: sbQuotes.fetchedAt, ledgerAt: sb.historyImport?.importedAt, attemptedAt: sbStatus.attemptedAt, error: sbStatus.error, readAt: sandboxResult.readAt, deliveryError: sandboxResult.error },
-      crypto: { name: cr.source, url: cr.sourceUrl, at: cryptoAt, attemptedAt: crStatus.attemptedAt, error: crStatus.error, readAt: cryptoResult.readAt, deliveryError: cryptoResult.error },
+      crypto: { name: cr.source, url: cr.sourceUrl, at: cryptoAt, ledgerAt: cr.ledgerUpdatedAt ?? cr.fetchedAt ?? undefined, attemptedAt: crStatus.attemptedAt, error: crStatus.error, readAt: cryptoResult.readAt, deliveryError: cryptoResult.error },
     },
-    usdRub: cr.usdRub ?? null, fxUpdatedAt: cr.fxUpdatedAt ?? cr.fetchedAt,
-    fxSource: cr.fxSource ?? 'Курс оценки DropsTab', sandboxNotes: sb.notes, verifiedAt: sb.verifiedAt ?? null,
+    usdRub: fx.usdRub ?? null, fxUpdatedAt: fx.fxUpdatedAt ?? fx.fetchedAt,
+    fxSource: fx.fxSource ?? 'Курс оценки DropsTab', sandboxNotes: sb.notes, verifiedAt: sb.verifiedAt ?? null,
     verifiedInventoryUrl: VERIFIED_INVENTORY_URL,
   };
 }

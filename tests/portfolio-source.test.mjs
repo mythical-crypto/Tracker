@@ -1,9 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createGithubReader, normalizeSteamSnapshot, validCombinedHistory, validExtraPortfolio, validSteamLive } from '../lib/portfolio-source.ts';
+import { createGithubReader, mergeSteamPriceItems, normalizeSteamSnapshot, validCombinedHistory, validExtraPortfolio, validSteamLive } from '../lib/portfolio-source.ts';
 
 const fixture = name => JSON.parse(readFileSync(new URL(`../data/${name}.json`, import.meta.url), 'utf8'));
+
+test('partial Steam files retain missing saved quotes and merge each item by its observation time', () => {
+  const oldAt = '2026-10-05T10:00:00Z';
+  const newAt = '2026-10-05T11:00:00Z';
+  const previous = { A: { priceKopecks: 100, updatedAt: oldAt }, B: { priceKopecks: 300, updatedAt: newAt } };
+  const incoming = { A: { priceKopecks: 200, updatedAt: newAt }, C: { priceKopecks: 400, updatedAt: newAt } };
+  assert.deepEqual(mergeSteamPriceItems(incoming, previous), { A: incoming.A, B: previous.B, C: incoming.C });
+  assert.deepEqual(mergeSteamPriceItems(previous, incoming), { A: incoming.A, B: previous.B, C: incoming.C });
+  assert.deepEqual(mergeSteamPriceItems({ A: { updatedAt: newAt } }, previous).A, previous.A);
+  assert.deepEqual(mergeSteamPriceItems(previous, { A: { updatedAt: newAt } }).A, previous.A);
+});
 
 test('published data contracts accept existing real files and reject wrong source/currency or broken records', () => {
   assert.equal(validSteamLive(fixture('live')), true);

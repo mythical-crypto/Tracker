@@ -7,10 +7,68 @@ import { refreshPrices } from '../scripts/update-prices.mjs';
 import { refreshSandbox, updateExtras } from '../scripts/update-extras.mjs';
 import { buildCryptoPortfolio, fetchCryptoSource, fetchSteamPrice, rublesToKopecks } from '../scripts/extra-sources.mjs';
 import { combinedSnapshot } from '../scripts/record-total.mjs';
+import { newerLedger } from '../lib/calculations.ts';
 
 const oldAt = '2026-10-05T10:00:00.000Z';
 const newAt = '2026-10-05T10:15:00.000Z';
 const quiet = { log() {}, error() {} };
+
+test('DropsTab airdrops preserve their purpose and do not fabricate a purchase cash flow', () => {
+  const payload = { portfolios: [{ name: 'NOT Pixel', symbol: 'PX', slug: 'not-pixel', currencyId: 84800, quantity: 0, price: { USD: 0.01345968 }, realizedProfit: { USD: -30.307256 } }], portfolioTotal: {} };
+  const transactions = [
+    { id: 15143537, currencyId: 84800, transactionType: 'SELL', quantity: 488, priceUsd: 0.062388, fee: 0, feeQuantity: 0, feeType: 'PERCENT', txDate: 1740999662052 },
+    { id: 14926354, currencyId: 84800, transactionType: 'BUY', purpose: 'AIRDROP', quantity: 130, priceUsd: 0.077762, fee: 0, feeQuantity: 0, feeType: 'PERCENT', txDate: 1740153368433 },
+    { id: 14438625, currencyId: 84800, transactionType: 'BUY', quantity: 358, priceUsd: 0.1697, fee: 0, feeQuantity: 0, feeType: 'PERCENT', txDate: 1738460670713 },
+  ];
+  const item = buildCryptoPortfolio({ payload, transactions, fetchedAt: newAt }).items[0];
+  const airdrop = item.trades.find(trade => trade.id === '14926354');
+  assert.equal(airdrop.purpose, 'AIRDROP');
+  assert.equal(airdrop.total, 0);
+  assert.equal(airdrop.quantity, 130);
+  assert.equal(airdrop.unitPrice, 0.077762);
+  const cashResult = item.trades.reduce((sum, trade) => sum + (trade.type === 'sell' ? trade.total : -trade.total), 0);
+  assert.ok(Math.abs(cashResult - item.realized) < 1e-10);
+});
+
+test('combined snapshots record changed holdings and cost without new market quotes', () => {
+  const cs = { items: [{ name: 'A', quantity: 2, costKopecks: 100 }] };
+  const prices = { items: { A: { priceKopecks: 200, updatedAt: oldAt } } };
+  const sb = { items: [] };
+  const cr = { usdRub: 80, fxUpdatedAt: oldAt, items: [] };
+  const first = combinedSnapshot(cs, prices, sb, cr, { snapshots: [] }, newAt);
+  cs.items[0].quantity = 1;
+  cs.items[0].costKopecks = 50;
+  const second = combinedSnapshot(cs, prices, sb, cr, { snapshots: [first] }, '2026-10-05T10:30:00.000Z');
+  assert.ok(second);
+  assert.equal(second.value, 2);
+  assert.equal(second.cost, 0.5);
+  assert.equal(second.freshCount, 0);
+  assert.equal(second.itemUpdatedAt['cs2:A'], oldAt);
+  assert.equal(combinedSnapshot(cs, prices, sb, cr, { snapshots: [second] }, '2026-10-05T10:45:00.000Z'), null);
+  cs.items[0].costKopecks = 75;
+  const correctedCost = combinedSnapshot(cs, prices, sb, cr, { snapshots: [second] }, '2026-10-05T10:45:00.000Z');
+  assert.equal(correctedCost.cost, 0.75);
+  assert.equal(correctedCost.value, 2);
+  cs.items = [];
+  const closed = combinedSnapshot(cs, prices, sb, cr, { snapshots: [correctedCost] }, '2026-10-05T11:00:00.000Z');
+  assert.equal(closed.value, 0);
+  assert.equal(closed.totalCount, 0);
+  assert.equal(closed.complete, true);
+  assert.equal(combinedSnapshot(cs, prices, sb, cr, { snapshots: [closed] }, '2026-10-05T11:15:00.000Z'), null);
+});
+
+test('combined snapshots retain delayed new observations using each previous quote date', () => {
+  const cs = { items: [{ name: 'A', quantity: 2, costKopecks: 100 }] };
+  const prices = { items: { A: { priceKopecks: 200, updatedAt: oldAt } } };
+  const sb = { items: [] };
+  const cr = { usdRub: 80, fxUpdatedAt: oldAt, items: [] };
+  const first = combinedSnapshot(cs, prices, sb, cr, { snapshots: [] }, newAt);
+  prices.items.A = { priceKopecks: 300, updatedAt: '2026-10-05T10:10:00.000Z' };
+  const delayed = combinedSnapshot(cs, prices, sb, cr, { snapshots: [first] }, '2026-10-05T10:30:00.000Z');
+  assert.ok(delayed);
+  assert.equal(delayed.value, 6);
+  assert.equal(delayed.freshCount, 1);
+});
 
 test('Steam parser requires a complete numeric RUB price and requests only Community Market RUB', async () => {
   assert.equal(rublesToKopecks('1\u00a0234,56 руб.'), 123456);
@@ -84,6 +142,38 @@ test('missing crypto quotes keep the previous observation and FX date without an
   assert.match(next.error, /0\/1/);
   payload.portfolios[0].quantity = null;
   assert.throws(() => buildCryptoPortfolio({ payload, transactions: [], previous: first, fetchedAt: newAt }), /quantity/);
+});
+
+test('a fully fetched crypto ledger replaces holdings independently of missing market quotes', () => {
+  const payload = { portfolios: [{ name: 'Asset', symbol: 'A', slug: 'a', currencyId: 1, quantity: 2, price: { USD: 4 }, initialCap: { USD: 7 } }], portfolioTotal: { totalCap: { USD: 8, RUB: 640 } } };
+  const first = buildCryptoPortfolio({ payload, transactions: [], fetchedAt: oldAt });
+  payload.portfolios[0].quantity = 3;
+  payload.portfolios[0].initialCap.USD = 10;
+  payload.portfolios[0].price.USD = null;
+  payload.portfolioTotal = {};
+  const next = buildCryptoPortfolio({ payload, transactions: [{ id: 1, currencyId: 1, transactionType: 'BUY', quantity: 3, priceUsd: 10 / 3, fee: 0, txDate: 1791194400000 }], previous: first, fetchedAt: newAt });
+  assert.equal(next.fetchedAt, oldAt);
+  assert.equal(next.ledgerUpdatedAt, newAt);
+  assert.equal(next.items[0].updatedAt, oldAt);
+  assert.equal(next.items[0].price, 4);
+  assert.equal(next.items[0].cost, 10);
+  assert.equal(next.items[0].quantity, 3);
+  assert.equal(next.items[0].trades.length, 1);
+  assert.equal(next.snapshots.length, 2);
+  assert.equal(next.snapshots.at(-1).value, 12);
+  assert.equal(next.snapshots.at(-1).cost, 10);
+  assert.equal(next.snapshots.at(-1).freshCount, 0);
+  assert.equal(next.snapshots.at(-1).itemUpdatedAt['crypto-a'], oldAt);
+  assert.equal(newerLedger(first, next, p => p.ledgerUpdatedAt ?? p.fetchedAt, p => p.fetchedAt), next);
+  const legacy = { ...first, ledgerUpdatedAt: undefined };
+  assert.equal(newerLedger(legacy, next, p => p.ledgerUpdatedAt ?? p.fetchedAt, p => p.fetchedAt), next);
+  const unchanged = buildCryptoPortfolio({ payload, transactions: [], previous: next, fetchedAt: '2026-10-05T10:30:00.000Z' });
+  assert.equal(unchanged.snapshots.length, 2);
+  payload.portfolios[0].quantity = 0;
+  const closed = buildCryptoPortfolio({ payload, transactions: [], previous: next, fetchedAt: '2026-10-05T10:30:00.000Z' });
+  assert.equal(closed.snapshots.length, 3);
+  assert.equal(closed.snapshots.at(-1).value, 0);
+  assert.equal(closed.snapshots.at(-1).totalCount, 0);
 });
 
 test('crypto missing transaction dates stay unknown and known costs come from covered assets', () => {

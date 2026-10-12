@@ -212,10 +212,11 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
     list.push({
       ...(trade.id !== undefined ? { id: String(trade.id) } : {}),
       type: String(trade.transactionType ?? trade.type ?? '').toLowerCase(),
+      ...(typeof trade.purpose === 'string' ? { purpose: trade.purpose } : {}),
       date: transactionDate(trade.txDate ?? trade.createdAt),
       quantity,
       unitPrice,
-      total: quantity * unitPrice,
+      total: trade.purpose === 'AIRDROP' ? 0 : quantity * unitPrice,
       fee: fee ?? 0,
       ...(feeCurrency ? { feeCurrency } : {}),
       ...(feeQuantity !== null ? { feeQuantity } : {}),
@@ -263,6 +264,12 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
   const costSummary = summarizeCosts(held);
   const complete = priced.length === held.length;
   const freshCount = freshIds.size;
+  const quantityKey = held.map((item) => `${item.id}:${item.quantity}`).sort().join('|');
+  const previousHeld = (previous?.items ?? []).filter((item) => item.quantity > 0);
+  const previousCost = summarizeCosts(previousHeld);
+  const previousQuantityKey = previousHeld.map((item) => `${item.id}:${item.quantity}`).sort().join('|');
+  const ledgerChanged = !!previous && (quantityKey !== previousQuantityKey
+    || costSummary.cost !== previousCost.cost || costSummary.costCoverageKey !== previousCost.costCoverageKey);
   let snapshots = previousSnapshots.map((snapshot) => {
     snapshot = annotateCostCoverage(snapshot, held);
     if (snapshot.coverageKey !== undefined && snapshot.pricedCount !== undefined && snapshot.totalCount !== undefined) {
@@ -274,7 +281,7 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
     const coveredIds = held.filter((item) => typeof itemPrices[item.id] === 'number').map((item) => item.id).sort();
     return { ...snapshot, pricedCount: coveredIds.length, totalCount: held.length, coverageKey: coveredIds.join('|'), complete: snapshot.complete && coveredIds.length === held.length, ...(snapshot.source?.startsWith('DropsTab') ? { source: 'DropsTab' } : {}) };
   });
-  if (freshCount > 0 && priced.length > 0 && !snapshots.some((snapshot) => snapshot.at === fetchedAt)) {
+  if ((freshCount > 0 || ledgerChanged) && (priced.length > 0 || !held.length) && !snapshots.some((snapshot) => snapshot.at === fetchedAt)) {
     const observedValue = priced.reduce((sum, item) => sum + item.price * item.quantity, 0);
     snapshots.push({
       at: fetchedAt,
@@ -290,7 +297,7 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
       itemQuantities: Object.fromEntries(held.map((item) => [item.id, item.quantity])),
       itemUpdatedAt: Object.fromEntries(priced.filter((item) => item.updatedAt).map((item) => [item.id, item.updatedAt])),
       quoteDates: Object.fromEntries(priced.map((item) => [item.id, item.updatedAt])),
-      quantityKey: held.map((item) => `${item.id}:${item.quantity}`).sort().join('|'),
+      quantityKey,
       freshCount,
       source: 'DropsTab',
     });
@@ -302,6 +309,7 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
   return {
     source: 'DropsTab',
     fetchedAt: freshCount ? fetchedAt : (previous?.fetchedAt ?? null),
+    ledgerUpdatedAt: fetchedAt,
     freshCount,
     totalCount: held.length,
     sourceUrl: DROPSTAB_PUBLIC_URL,

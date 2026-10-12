@@ -54,3 +54,18 @@ test('a position without accounting or operations has unknown transaction totals
   assert.equal(s.buyTotal, null);
   assert.equal(s.sellTotal, null);
 });
+
+test('airdrops are received units, not cash purchases or purchase operations', () => {
+  const s = assetStatistics(asset({ quantity: 0, cost: null, realized: -30, trades: [
+    trade('buy', 100, 60),
+    trade('buy', 130, 0, { purpose: 'AIRDROP' }),
+    trade('sell', 230, 30),
+  ] }));
+  assert.equal(s.boughtQuantity, 100);
+  assert.equal(s.buyTotal, 60);
+  assert.equal(s.buyCount, 1);
+  assert.equal(s.airdroppedQuantity, 130);
+  assert.equal(s.airdropCount, 1);
+  assert.equal(s.soldQuantity, 230);
+  assert.equal(s.totalResult, -30);
+});

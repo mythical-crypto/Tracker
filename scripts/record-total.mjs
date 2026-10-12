@@ -14,21 +14,30 @@ export function combinedSnapshot(cs, prices, sb, cr, history, at = new Date().to
   ].filter((item) => item.quantity > 0);
   const priced = assets.filter((item) => Number.isFinite(item.price) && item.price >= 0);
   const last = [...history.snapshots].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).at(-1);
-  const previousAt = last ? Date.parse(last.at) : -Infinity;
-  const freshCount = priced.filter((item) => Number.isFinite(Date.parse(item.updatedAt)) && Date.parse(item.updatedAt) > previousAt).length;
+  const freshCount = priced.filter((item) => {
+    const quoteAt = Date.parse(item.updatedAt);
+    const previousAt = last ? Date.parse(last.itemUpdatedAt?.[item.id] ?? last.quoteDates?.[item.id] ?? last.at) : -Infinity;
+    return Number.isFinite(quoteAt) && quoteAt > previousAt;
+  }).length;
   const fxUpdatedAt = cr.fxUpdatedAt ?? null;
-  if (!priced.length || (!freshCount && !(Date.parse(fxUpdatedAt) > previousAt))) return null;
+  const previousFxAt = last ? Date.parse(last.fxUpdatedAt ?? last.at) : -Infinity;
+  const costSummary = summarizeCosts(assets, { usdRub: fx });
+  const quantityKey = assets.map((item) => `${item.id}:${item.quantity}`).sort().join('|');
+  const ledgerChanged = !!last && ((last.quantityKey !== undefined && last.quantityKey !== quantityKey)
+    || (last.costCoverageKey !== undefined && (last.costCoverageKey !== costSummary.costCoverageKey || last.cost !== costSummary.cost)));
+  if ((!priced.length && !(ledgerChanged && !assets.length))
+    || (!freshCount && !(Date.parse(fxUpdatedAt) > previousFxAt) && !ledgerChanged)) return null;
   const itemUpdatedAt = Object.fromEntries(priced.filter((item) => item.updatedAt).map((item) => [item.id, item.updatedAt]));
   return {
     at,
     value: priced.reduce((sum, item) => sum + item.quantity * item.price * (item.currency === 'USD' ? fx : 1), 0),
-    ...summarizeCosts(assets, { usdRub: fx }),
+    ...costSummary,
     complete: priced.length === assets.length,
     pricedCount: priced.length,
     totalCount: assets.length,
     freshCount,
     coverageKey: priced.map((item) => item.id).sort().join('|'),
-    quantityKey: assets.map((item) => `${item.id}:${item.quantity}`).sort().join('|'),
+    quantityKey,
     itemPrices: Object.fromEntries(priced.map((item) => [item.id, item.price * (item.currency === 'USD' ? fx : 1)])),
     itemQuantities: Object.fromEntries(assets.map((item) => [item.id, item.quantity])),
     itemUpdatedAt,

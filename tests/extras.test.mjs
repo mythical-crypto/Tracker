@@ -44,6 +44,11 @@ test('crypto preserves seven assets, closed PX, source fees, and FX provenance',
   assert.equal(items.get('PX').quantity, 0);
   assert.equal(items.get('PX').trades.length, 3);
   assert.equal(items.get('PX').realized, -30.307256);
+  const airdrop = items.get('PX').trades.find(trade => trade.id === '14926354');
+  assert.equal(airdrop.purpose, 'AIRDROP');
+  assert.equal(airdrop.total, 0);
+  const pxCashResult = items.get('PX').trades.reduce((sum, trade) => sum + (trade.type === 'sell' ? trade.total : -trade.total), 0);
+  assert.ok(Math.abs(pxCashResult - items.get('PX').realized) < 1e-10);
   assert.equal(items.get('ASTER').currency, 'USD');
   assert.ok(items.get('ASTER').trades.some((trade) => trade.fee > 0 && trade.date && trade.total === trade.quantity * trade.unitPrice));
   assert.ok(portfolio.usdRub > 0);
