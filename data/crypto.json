@@ -1015,6 +1015,6 @@
   "usdRub": 84.82809309922419,
   "fxUpdatedAt": "2026-10-06T06:53:13.383Z",
   "fxSource": "DropsTab portfolio valuation ratio (RUB/USD)",
-  "attemptedAt": "2026-10-28T21:03:02.717Z",
+  "attemptedAt": "2026-10-29T00:53:19.644Z",
   "error": "DropsTab refresh failed: HTTP 403 from dropstab.com"
 }
