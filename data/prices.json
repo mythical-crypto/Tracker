@@ -1,250 +1,250 @@
 {
   "source": "Steam Community Market",
   "currency": "RUB",
-  "lastAttemptAt": "2026-10-31T13:38:43.525Z",
-  "lastSuccessAt": "2026-10-31T13:38:43.525Z",
-  "lastFullSuccessAt": "2026-10-31T13:38:43.525Z",
+  "lastAttemptAt": "2026-10-31T17:58:16.119Z",
+  "lastSuccessAt": "2026-10-31T17:58:16.119Z",
+  "lastFullSuccessAt": "2026-10-31T17:58:16.119Z",
   "freshCount": 48,
   "totalCount": 48,
   "items": {
     "Charm | Baby's AK": {
-      "priceKopecks": 1764,
-      "updatedAt": "2026-10-31T13:37:24.789Z",
+      "priceKopecks": 1801,
+      "updatedAt": "2026-10-31T17:56:56.174Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IW2MHqH6lhKpcj_6WbwURPOn53f_yNI6rz9OfdrJPbHXjDIwL4ntOVoH3jqkRl3sm_RztmqeC6fa1IgCJAiQ7IOrFDmxYcaCqwO/180fx180f"
     },
     "Charm | Big Kev": {
       "priceKopecks": 1603,
-      "updatedAt": "2026-10-31T13:37:28.894Z",
+      "updatedAt": "2026-10-31T17:57:00.341Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IWsPGiE7Fhy-I764RbsQiL8l4Xz9Cxc4_ugY5tmJebdDDHExLxy5uUwHXGwkE11tWSByo37IH-UaQUoX5ZxR-Re4UK5xtezNvSiuVIxxa4IjQ/180fx180f"
     },
     "Charm | Die-cast AK": {
-      "priceKopecks": 24886,
-      "updatedAt": "2026-10-31T13:37:33.029Z",
+      "priceKopecks": 24807,
+      "updatedAt": "2026-10-31T17:57:04.588Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IW2MHqH6lhKpcj_6WbwURPOn53f9ydX4-vgPvw_efKXXzWWkL0ksrQwGCjmlBl24DjUyNipcS-WOFQoDsd2Te9Zsg74zIPxCozwxw/180fx180f"
     },
     "Charm | Disco MAC": {
-      "priceKopecks": 3248,
-      "updatedAt": "2026-10-31T13:37:37.191Z",
+      "priceKopecks": 3192,
+      "updatedAt": "2026-10-31T17:57:08.818Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IW2MHqH6lhKpcj_6WbwURPOk5fjrHJk6P6nfLBoMr7CXmLDwOhy5LZoTCywxxklt2WEz96gIiiQPwJyCJYhEORYuhW9ldDkKaq8sNVLzyxd/180fx180f"
     },
     "Charm | Glamour Shot": {
-      "priceKopecks": 6471,
-      "updatedAt": "2026-10-31T13:37:41.363Z",
+      "priceKopecks": 6546,
+      "updatedAt": "2026-10-31T17:57:13.006Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IW2MHqH6lhKpcj_6WbwURPOi4Xwwihe-PeiJqA6dvPDD2XAmL4i47ZtHyuxxU5_tWTcyYqvcymVawEnWZNxEeAMtEWm0oqw8L2NeF4/180fx180f"
     },
     "Charm | Hot Hands": {
-      "priceKopecks": 4197,
-      "updatedAt": "2026-10-31T13:37:45.623Z",
+      "priceKopecks": 4079,
+      "updatedAt": "2026-10-31T17:57:17.150Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IW2MHqH6lhKpcj_6WbwURPOipPjpB1W7vWjaeo_c_PLDzWRl-on6bc4GyznzBsh4zjTyY2geSnCPAAoDZJ2E-IItULpjJS5YK7VXWL0/180fx180f"
     },
     "Charm | Hot Sauce": {
-      "priceKopecks": 1726,
-      "updatedAt": "2026-10-31T13:37:49.757Z",
+      "priceKopecks": 1729,
+      "updatedAt": "2026-10-31T17:57:21.364Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IWsPGiE7Fhy-I764RbsQiL8l4Xz9Cxc4_ugY5t-If2sDWaEwuZjoK87SnHqwU4j5mzTzdmrc36SalchD5F1TOQD4RTtkobmMuzh5wzY3YpE02yg2QU8_kjN/180fx180f"
     },
     "Charm | Lil' Ava": {
-      "priceKopecks": 1069,
-      "updatedAt": "2026-10-31T13:37:53.909Z",
+      "priceKopecks": 1090,
+      "updatedAt": "2026-10-31T17:57:25.580Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IWsPGiE7Fhy-I764RbsQiL8l4Xz9Cxc4_ugY5tsNvHdCDWVkOsu5uQ4FnC1lkx-sWSHm92ucHrBPVMjWJN5QuQKsxO_xIWyM_SiuVKGOzqoDg/180fx180f"
     },
     "Charm | Lil' Crass": {
-      "priceKopecks": 1249,
-      "updatedAt": "2026-10-31T13:37:58.001Z",
+      "priceKopecks": 1232,
+      "updatedAt": "2026-10-31T17:57:29.721Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IWsPGiE7Fhy-I764RbsQiL8l4Xz9Cxc4_ugY5tqNfWBB2ucwKAus-dqTX_kx01xsG_XzYmpeH2WPA8lX8YhTeZesEa8m4GxZOLl7leLlcsbmiGjx1Ce/180fx180f"
     },
     "Gallery Case": {
-      "priceKopecks": 6464,
-      "updatedAt": "2026-10-31T13:38:02.097Z",
+      "priceKopecks": 6592,
+      "updatedAt": "2026-10-31T17:57:34.066Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnYVuPD5baE6IfTFCmSRme0j5eU5SXrjkRwmt2rWnoqhdnjEPQQiDpRxTflK7EePRV2-Kg/180fx180f"
     },
     "Paris 2023 Challengers Sticker Capsule": {
-      "priceKopecks": 774,
-      "updatedAt": "2026-10-31T13:38:06.204Z",
+      "priceKopecks": 786,
+      "updatedAt": "2026-10-31T17:57:38.298Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bjn_lDkShjjoYbh_ilk__O8Ybc_cKLAMWSYwOJ6te9uSjug2x8isG7czNageS2VaAIoD8ZxRbYNsBa4x9XvZO7r4wyK395AmS782H5XrnE8Sh4_4i8/180fx180f"
     },
     "Paris 2023 Contenders Sticker Capsule": {
-      "priceKopecks": 786,
-      "updatedAt": "2026-10-31T13:38:10.480Z",
+      "priceKopecks": 798,
+      "updatedAt": "2026-10-31T17:57:42.451Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bjn_lDkShjjoYbh_ilk__O8Ybc_cKLAMWSfz_pzvuVsXTr9kRki5m_Uwtz7cXKWO1ApCcByRLEO50LtkoWyP7_k4Afdi99GniT4jzQJsHjtsZcvVQ/180fx180f"
     },
     "Paris 2023 Legends Sticker Capsule": {
       "priceKopecks": 870,
-      "updatedAt": "2026-10-31T13:38:14.625Z",
+      "updatedAt": "2026-10-31T17:57:46.707Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bjn_lDkShjjoYbh_ilk__O8Ybc_cKLAMWuVxut4tPInTi_qwUR_5m_TmN79cHyfagMgA8cjQuEMsUW-x4K1P-Ozs1TZ34hNxDK-0H34xwtSCg/180fx180f"
     },
     "Souvenir Charm | Austin 2025 Highlight | karrigan Double Headshot": {
       "priceKopecks": 1117,
-      "updatedAt": "2026-10-31T13:38:18.728Z",
+      "updatedAt": "2026-10-31T17:57:50.875Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGI6zwki4Uf_a0IWgIGjFtQQgu4z31VjyUk-hzMOu-3APtqX8a_U6c6SRW2TGlL4k5uI-TXzhxEUm6mqDzN2pcC6WZwR0A4wwG7BUDwUFHQ/180fx180f"
     },
     "Sticker | 9INE (Glitter) | Paris 2023": {
-      "priceKopecks": 815,
-      "updatedAt": "2026-10-31T13:38:22.869Z",
+      "priceKopecks": 780,
+      "updatedAt": "2026-10-31T17:57:55.023Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8j671Dpfhr9l4L0-DAV66f-afRrcvTFV2HAl-0l5-A9Sii1xBh-5WWDydeoc3uUbFMlDcN4TPlK7Ecjx7N-gg"
     },
     "Sticker | Bolt Charge (Foil)": {
-      "priceKopecks": 16532,
-      "updatedAt": "2026-10-31T13:38:26.969Z",
+      "priceKopecks": 17021,
+      "updatedAt": "2026-10-31T17:57:59.191Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebhbqtkLM-fB2CY1eB_vuZWWyGhkBhpsTzdwtusICmTaQVxA5ElRLQP5xG8koLgPr7m4FbZ2d9HzSSsin5B7TErvbjkBUWgqA/180fx180f"
     },
     "Sticker | Bolt Energy (Foil)": {
-      "priceKopecks": 5993,
-      "updatedAt": "2026-10-31T13:38:31.119Z",
+      "priceKopecks": 5884,
+      "updatedAt": "2026-10-31T17:58:03.418Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebhbqtkLM-fB2CY1eB_vuZWQCe22xh0tjnVyNr6dCnCbQciDJZ2Q-4Jsxi5lNTnNurq41bWjI8Wnnir3XtXrnE8197Wtac/180fx180f"
     },
     "Sticker | Bolt Strike (Foil)": {
-      "priceKopecks": 15697,
-      "updatedAt": "2026-10-31T13:38:35.320Z",
+      "priceKopecks": 15807,
+      "updatedAt": "2026-10-31T17:58:07.631Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebhbqtkLM-fB2CY1eB_vuZWWz68209_4WmDzYyqeC2ROFcjA5p3TLRetRmwl9XjPuiz41eKj49AzSr32CtXrnE8Wox2Gd0/180fx180f"
     },
     "Sticker | Boom Trail (Glitter)": {
-      "priceKopecks": 1322,
-      "updatedAt": "2026-10-31T13:38:39.423Z",
+      "priceKopecks": 1336,
+      "updatedAt": "2026-10-31T17:58:11.905Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebhb6hkNOSWHFiV2f56v_JgQCeMkxIyoXPSyt2pdirFaQQjXsF0R-4JukS5mtLuP7nh4FaN34NGmyyoiSwf63pu_a9cBlU2l3LX/180fx180f"
     },
     "Sticker | Chompers": {
-      "priceKopecks": 2645,
-      "updatedAt": "2026-10-31T13:38:43.525Z",
+      "priceKopecks": 2999,
+      "updatedAt": "2026-10-31T17:58:16.119Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoOKveKF_H-ObD3Wb_uN5pfVhAS3ixkl_4WTWyI79d3jGPAZ1XJAhR-EOsBC6kN22Yb-34w3cjYoXnCjgznQeFtpYvFU"
     },
     "Sticker | ENCE (Holo) | Paris 2023": {
-      "priceKopecks": 8131,
-      "updatedAt": "2026-10-31T13:35:27.880Z",
+      "priceKopecks": 8137,
+      "updatedAt": "2026-10-31T17:54:58.448Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8jx5FrifhX-kpmurycDvaCoP_w4cKXECGPDkOgisbIwGHzml0R1sGjXw4uqdH2TOFMgDYwwG7AEeojR5g"
     },
     "Sticker | Fnatic (Holo) | Paris 2023": {
-      "priceKopecks": 7000,
-      "updatedAt": "2026-10-31T13:35:32.030Z",
+      "priceKopecks": 7097,
+      "updatedAt": "2026-10-31T17:55:02.700Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8jy5E3kfhX-kpmupHAOt6SvbaBocKXDV2bFk-0gsrIxHi_rlk5w5z_Ww9uhdiqWalMhCIwwG7AaVbv4pQ"
     },
     "Sticker | forZe eSports (Glitter) | Paris 2023": {
-      "priceKopecks": 500,
-      "updatedAt": "2026-10-31T13:35:36.235Z",
+      "priceKopecks": 600,
+      "updatedAt": "2026-10-31T17:55:06.939Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8jy5Uv9fhr9l4L0-DAV6vH3MKU1JKjCVmLIw-py5LE-Hyzhk0Ql4TiDzN6rJC-WO1QiCJN5FPlK7Ef8v0O-8w/180fx180f"
     },
     "Sticker | FURIA (Glitter) | Copenhagen 2024": {
-      "priceKopecks": 2364,
-      "updatedAt": "2026-10-31T13:35:40.917Z",
+      "priceKopecks": 2400,
+      "updatedAt": "2026-10-31T17:55:11.198Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmxPSnHtwI68pLm42bgTRTlipPysyBfvqeobaJoJvbLDTDBmLpy4bU5SnnqkUxx52ncmdytIi-VbAAoX5RuBbld-zSrKvU"
     },
     "Sticker | G2 Esports (Glitter) | Copenhagen 2024": {
-      "priceKopecks": 1496,
-      "updatedAt": "2026-10-31T13:35:45.122Z",
+      "priceKopecks": 1497,
+      "updatedAt": "2026-10-31T17:55:15.369Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmxPSnHtwI689XL7VXuVQn0jNjm-3UK6qqobKI4IqjCC2TGmLwv4uJtTCvhwEtxsmXRmNv9eH-fPAMnFNIuEmqGoj_i/180fx180f"
     },
     "Sticker | G2 Esports (Glitter) | Shanghai 2024": {
-      "priceKopecks": 1225,
-      "updatedAt": "2026-10-31T13:35:49.312Z",
+      "priceKopecks": 1201,
+      "updatedAt": "2026-10-31T17:55:19.587Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNmpNCnHtwI689XL7VXuVQn0jNiy_HRat6r8OPJocvLHXjSWwOgnteRvTniywUsi6m_dydb9eHyebVMkFNIuEqNX9Laz/180fx180f"
     },
     "Sticker | GamerLegion (Glitter) | Copenhagen 2024": {
-      "priceKopecks": 2357,
-      "updatedAt": "2026-10-31T13:35:53.453Z",
+      "priceKopecks": 2369,
+      "updatedAt": "2026-10-31T17:55:23.757Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmxPSnHtwI684vL7VXuVQn0jNixqyMPt6r-PfdudvbDDWbGlb515eA6Hn_lwxgk5WmDmd2uJ3LCbFQoFNIuEjN3tIPn"
     },
     "Sticker | Gold Teef (Foil)": {
-      "priceKopecks": 6009,
-      "updatedAt": "2026-10-31T13:35:57.589Z",
+      "priceKopecks": 6510,
+      "updatedAt": "2026-10-31T17:55:27.920Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoPShYahSLf-GGm_ewr8v6eM6SX23wBwjsj_SyY76eSjFaAR1A8YiF7YNsxO9x9PnMrmwsRue1dydB_NxlQ/180fx180f"
     },
     "Sticker | Heroic (Glitter) | Copenhagen 2024": {
-      "priceKopecks": 858,
-      "updatedAt": "2026-10-31T13:36:01.708Z",
+      "priceKopecks": 857,
+      "updatedAt": "2026-10-31T17:55:32.072Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmxPSnHtwI6_ILm5WbgTRTlipPysyENvvOrP_Bsc_XCVjaUk7Yh6bBoTnrnzRtw4WnXnN34eC_FOFAjXJRuBbld5WNlP-k"
     },
     "Sticker | Heroic (Glitter) | Paris 2023": {
-      "priceKopecks": 269,
-      "updatedAt": "2026-10-31T13:36:05.886Z",
+      "priceKopecks": 340,
+      "updatedAt": "2026-10-31T17:55:36.256Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8j870vofhr9l4L0-DAVu6D2MfU-I_WWDDaSw7904-Q9SnDnkEwm6jvdz9uhIH3FaFAgCsZ0EPlK7EdmbhvPzA"
     },
     "Sticker | HEROIC (Glitter) | Shanghai 2024": {
-      "priceKopecks": 600,
-      "updatedAt": "2026-10-31T13:36:10.051Z",
+      "priceKopecks": 599,
+      "updatedAt": "2026-10-31T17:55:40.558Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNmpNCnHtwI6_ILm5WbgTRTlipPysyYJ6av4a_Y6daTKVzfFk7ojsrI4HCyxkEt35W_dz9eueHnFbg9yX8NuBbldJ31zKVo"
     },
     "Sticker | Heroic (Holo) | Paris 2023": {
       "priceKopecks": 3596,
-      "updatedAt": "2026-10-31T13:36:14.214Z",
+      "updatedAt": "2026-10-31T17:55:44.739Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8j870vofhX-kpmurnIMvfH7PPw9JPTLWDSVwrok6LFoFyuxxU8l6m2BzN-rJC7GZlAgW4wwG7CBEWot4A"
     },
     "Sticker | High Heat": {
       "priceKopecks": 4443,
-      "updatedAt": "2026-10-31T13:36:18.332Z",
+      "updatedAt": "2026-10-31T17:55:48.882Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebheKV9JeKsCGuRzOtlj_V-QGfrkxhxsmnczNeocS_EawIiXpshRrZes0G7wNLhN7_lsVaIj4hHzy6tkGoXuV9He8lM/180fx180f"
     },
     "Sticker | Hydro Stream": {
-      "priceKopecks": 702,
-      "updatedAt": "2026-10-31T13:36:22.444Z",
+      "priceKopecks": 713,
+      "updatedAt": "2026-10-31T17:55:53.051Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebheKV9JeKsGWaExPxJpOl7Siz9wEQi6m3RmdmvJXOTaA9xDMAiReFZ4xjuxtXnNOOw5wfb2ohMyiqqhjQJsHim8N8NHg/180fx180f"
     },
     "Sticker | Hydro Wave": {
-      "priceKopecks": 1135,
-      "updatedAt": "2026-10-31T13:36:26.699Z",
+      "priceKopecks": 1140,
+      "updatedAt": "2026-10-31T17:55:57.308Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebheKV9JeKsGWaExPxJv-9sASq1lkx-6m_dy9-teX_DZ1ApCcR1RuYJ5hW6wIa2Ye22tlOP2opGzSjgznQeErtUseQ/180fx180f"
     },
     "Sticker | Hypnoteyes (Holo)": {
       "priceKopecks": 6541,
-      "updatedAt": "2026-10-31T13:36:30.826Z",
+      "updatedAt": "2026-10-31T17:56:01.488Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoP6rZrBkI-WfD3WvwOBxovhWSjC2hlN2smvSyNqpeXuWbg4oC8R2Q-EPt0Ppk4XhNbvn51TW34MXzCj3iixN8G81tFVqqb7u/180fx180f"
     },
     "Sticker | Kawaii Eyes (Glitter)": {
-      "priceKopecks": 6100,
-      "updatedAt": "2026-10-31T13:36:34.937Z",
+      "priceKopecks": 6200,
+      "updatedAt": "2026-10-31T17:56:05.681Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoPWiYbB5JeKsBWaHwOd_j-RwSjr9zER04WuEzdavJ3ySZg8oCpdzQ-Vcskbrl4XhMbm04VTZ2N9Nznr7jDQJsHi0uU4vMQ/180fx180f"
     },
     "Sticker | MOUZ (Glitter) | Shanghai 2024": {
-      "priceKopecks": 1490,
-      "updatedAt": "2026-10-31T13:36:39.109Z",
+      "priceKopecks": 1221,
+      "updatedAt": "2026-10-31T17:56:09.819Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNmpNCnHtwI6-Yjh8GbgTRTlipPys3IL7vOsPPRvdqWXVj7Jl78utuVtTCrgxRx25Tndzo2udnyRPVUnXJduBbldo0MfacA"
     },
     "Sticker | Mustachio (Foil)": {
-      "priceKopecks": 5768,
-      "updatedAt": "2026-10-31T13:36:43.276Z",
+      "priceKopecks": 5786,
+      "updatedAt": "2026-10-31T17:56:13.973Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoPShYahSLeWAGmaTyes46eVqGX-wzU8j42_Tm9-qd3LFZlByWcd4QOZetxPumtflP77g4lbeiZUFk3sS_ps8MA/180fx180f"
     },
     "Sticker | Natus Vincere (Glitter) | Shanghai 2024": {
-      "priceKopecks": 1859,
-      "updatedAt": "2026-10-31T13:36:47.386Z",
+      "priceKopecks": 1610,
+      "updatedAt": "2026-10-31T17:56:18.448Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNmpNCnHtwI6-obi42bgTRTlipPys3pdvaP2baA8JaPACjGTx7wvs-I5HX21wB934ziBz43_cHOfbwIgDpNuBbldZNZU1MI/180fx180f"
     },
     "Sticker | OG (Holo) | Paris 2023": {
-      "priceKopecks": 6932,
-      "updatedAt": "2026-10-31T13:36:51.670Z",
+      "priceKopecks": 7093,
+      "updatedAt": "2026-10-31T17:56:22.829Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8j77WbvThH-0M7hrXYLu6P8bfVrdqLBWzDFw-wu6Lg8H3nlzEkkt2nTy9ahIi-WOgA-SswnSvy-m7M"
     },
     "Sticker | Red Shades (Foil)": {
       "priceKopecks": 10250,
-      "updatedAt": "2026-10-31T13:36:55.839Z",
+      "updatedAt": "2026-10-31T17:56:27.032Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoPShYahSM-WdCWuR0v1zo69tTX-ywEQi5Gjdwtz8cSnBPQchA5JwQLUPu0G6kNS0MLni4APfiY9C02yg2bRWnsHx/180fx180f"
     },
     "Sticker | Ruby Stream (Lenticular)": {
       "priceKopecks": 25895,
-      "updatedAt": "2026-10-31T13:36:59.998Z",
+      "updatedAt": "2026-10-31T17:56:31.194Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebhZKFjNPmQG2uR09F0vO5mSxa8mxhp5DvVy9f8di6TbgMkWJEhQ-UNsUa7w4CxM-LiswbbjYlNmSv-jC8auzErvbh9iAra4Q/180fx180f"
     },
     "Sticker | Say Cheese (Holo)": {
       "priceKopecks": 4163,
-      "updatedAt": "2026-10-31T13:37:04.125Z",
+      "updatedAt": "2026-10-31T17:56:35.324Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjn_lDkShjjoZXy_CRPoPqhZKtSLf-GGm_ewLd14eQwGn7ikBwmsTjcnIqpciiWOw8mX5AhEeUIuxKxxIKzM-2w4hue1dwDbV6e4w/180fx180f"
     },
     "Sticker | Team Spirit (Glitter) | Shanghai 2024": {
-      "priceKopecks": 3547,
-      "updatedAt": "2026-10-31T13:37:08.259Z",
+      "priceKopecks": 3647,
+      "updatedAt": "2026-10-31T17:56:39.494Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNmpNCnHtwI655f9-GbgTRTlipPys3Za66L2OfRscPLEVmPFlbkh5Oc6TX3klERz5WvTyNmoInnDbg8hCsRuBbldmI9JbkQ/180fx180f"
     },
     "Sticker | Vitality (Glitter) | Copenhagen 2024": {
-      "priceKopecks": 1321,
-      "updatedAt": "2026-10-31T13:37:12.449Z",
+      "priceKopecks": 1221,
+      "updatedAt": "2026-10-31T17:56:43.689Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmxPSnHtwI64o7g62bgTRTlipPysyYDuqf3bKA7cqKQCGOVxbhw5rY7TnrqkR50tjnTnNatdHmeawYkXJFuBbldcV_h-N4"
     },
     "Sticker | Vitality (Glitter) | Paris 2023": {
-      "priceKopecks": 411,
-      "updatedAt": "2026-10-31T13:37:16.551Z",
+      "priceKopecks": 340,
+      "updatedAt": "2026-10-31T17:56:47.848Z",
       "icon": "https://community.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjNqgJ3KEtwYnp8ji403mfhr9l4L0-DAVuPP-MaE0cPHHWmaVlLpws-M9Hi23wU8j4mXTydyuc3_BbwYjDpQjQvlK7Ec6G0x9uQ"
     },
     "Sticker | Winding Scorch (Foil)": {
-      "priceKopecks": 15587,
-      "updatedAt": "2026-10-31T13:37:20.661Z",
+      "priceKopecks": 15600,
+      "updatedAt": "2026-10-31T17:56:52.004Z",
       "icon": "https://community.fastly.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJai0ki7VeTHjMmuOHaC619h7cjx5lzqRBPln5rf_jBa6ebhbqtkLM-VB3WV_vp-ouRsAXDhxBl_sG6Dwtz7dymXbFQlWJtyF-4J4RS_xoHiNO_k7wyMgooQnCvgznQe71wX39U/180fx180f"
     }
   }
