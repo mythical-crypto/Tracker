@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticatedCookie } from '@/lib/auth.mjs';
+import { canAccessTracker } from '@/lib/auth.mjs';
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   if (pathname === '/welcome' || pathname === '/login' || pathname === '/api/auth/login' || pathname === '/api/auth/logout') {
     return NextResponse.next();
   }
-  if (isAuthenticatedCookie(request.headers.get('cookie'))) return NextResponse.next();
+  if (canAccessTracker(request.headers)) return NextResponse.next();
 
   if (pathname.startsWith('/api/')) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });

@@ -2,182 +2,318 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Activity, ArrowRight, ArrowUpRight, Boxes, ChartNoAxesCombined, CircleHelp, Coins, Gamepad2, Layers3, ChevronRight, ExternalLink, LayoutGrid, List, LogOut, Moon, Pin, RefreshCw, Search, Sun, UserRound, X, Plus, Bookmark, History } from 'lucide-react';
-import { tradeDate, newestTradeFirst, tradeSource, tradeLabel, tradeKind } from '@/lib/trades';
-import type { Asset, AssetClass, Currency, PortfolioData, Trade } from '@/lib/types';
-import { assetPnl, assetPriceHistory, convert, mergePortfolio, periodChange, summarize, type PeriodChange } from '@/lib/calculations';
-import HistoryChart, { PeriodSummary } from './history-chart';
-import AssetSparkline from './asset-sparkline';
-import AssetDetails from './asset-details';
-import { rubPrice as displayRubPrice } from './portfolio-ui';
-import MarketMovers from './market-movers';
-import TrackedItems from './tracked-items';
+import { ArrowRight, ArrowUpRight, Bookmark, Boxes, ChartNoAxesCombined, ChevronDown, Clock3, Coins, Gamepad2, History, LogOut, Moon, Plus, RefreshCw, Sun } from 'lucide-react';
 import { currentBasketHistory } from '@/lib/basket-history';
-import { compareAssets, type AssetSort, type SortDirection } from '@/lib/asset-sort';
+import { assetPriceHistory, convert, mergePortfolio, periodChange, summarize } from '@/lib/calculations';
+import type { MarketPeriod } from '@/lib/market-movers';
+import type { Asset, AssetClass, Currency, PortfolioData } from '@/lib/types';
+import AssetDetails from './asset-details';
+import HistoryChart from './history-chart';
+import MarketMovers from './market-movers';
+import { AssetList, TradeList, type AssetView } from './portfolio-lists';
+import { AssetImage, classNames, color, countLabel, money, pct, signed, stale, time, type AssetOptions } from './portfolio-ui';
+import TrackedItems from './tracked-items';
 
-const sections = [{ id: 'overview', href: '/', name: 'Обзор' }, { id: 'cs2', href: '/cs2', name: 'CS2' }, { id: 'sandbox', href: '/sandbox', name: 'Sandbox' }, { id: 'crypto', href: '/crypto', name: 'Криптовалюты' }] as const;
-const classes: AssetClass[] = ['cs2', 'sandbox', 'crypto'];
-const classNames: Record<AssetClass, string> = { cs2: 'CS2', sandbox: 'Sandbox', crypto: 'Криптовалюты' };
-const money = (value: number | null | undefined, currency: Currency = 'RUB', digits = 0) => value == null || !Number.isFinite(value) ? '—' : new Intl.NumberFormat('ru-RU', { style: 'currency', currency, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
-const number = (value: number, digits = 2) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: digits }).format(value);
-const countLabel = (value: number, forms: [string, string, string]) => `${value} ${forms[value % 100 >= 11 && value % 100 <= 14 ? 2 : value % 10 === 1 ? 0 : value % 10 >= 2 && value % 10 <= 4 ? 1 : 2]}`;
-const monthFormatter = new Intl.DateTimeFormat('sv-SE', { year: 'numeric', month: '2-digit', timeZone: 'Europe/Astrakhan' });
-const tradeMonthKey = (trade: Trade) => trade.date ? monthFormatter.format(new Date(trade.date)) : 'unknown';
-const price = (value: number | null, currency: Currency) => value === null ? '—' : new Intl.NumberFormat('ru-RU', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: currency === 'USD' ? Math.min(16, Math.max(4, 3 - Math.floor(Math.log10(Math.abs(value) || 1)))) : 2 }).format(value);
-const pct = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : ''}${number(value, 2)}%`;
-const signed = (value: number | null, currency: Currency = 'RUB', digits = 0) => value === null ? '—' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${money(Math.abs(value), currency, digits)}`;
-const color = (value: number | null) => value === null || value === 0 ? '' : value > 0 ? 'positive' : 'negative';
-const time = (at: string | null | undefined, full = false) => at && Number.isFinite(Date.parse(at)) ? new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', ...(full ? { year: 'numeric' as const } : {}), hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Astrakhan' }).format(new Date(at)) : 'Дата неизвестна';
-const stale = (at: string | null) => !at || !Number.isFinite(Date.parse(at)) || Date.now() - Date.parse(at) > 3600000;
-const horizons = [{ days: 1, label: '24 ч' }, { days: 7, label: '7 д' }, { days: 30, label: '30 д' }] as const;
-const feeText = (t: Trade) => t.feeUnknown ? '—' : t.feeType === 'PERCENT' ? `${number(t.fee, 6)}%` : t.feeQuantity !== undefined ? `${number(t.feeQuantity, 10)} ${t.feeCurrency || t.currency}` : `${number(t.fee, 8)} ${t.feeCurrency || (t.currency === 'RUB' ? '₽' : '$')}`;
-type Options = { pinned?: boolean; note?: string; target?: number };
+const portfolios = [
+  { id: 'cs2', href: '/cs2', Icon: Gamepad2 },
+  { id: 'sandbox', href: '/sandbox', Icon: Boxes },
+  { id: 'crypto', href: '/crypto', Icon: Coins },
+] as const;
+const tabs = [
+  { id: 'overview', label: 'Динамика', Icon: ChartNoAxesCombined },
+  { id: 'assets', label: 'Активы', Icon: Boxes },
+  { id: 'trades', label: 'Операции', Icon: History },
+  { id: 'watch', label: 'Наблюдение', Icon: Bookmark },
+] as const;
 
-function AssetImage({ asset }: { asset: Asset }) {
-  const [failed, setFailed] = useState(false);
-  return <span className={`asset-image ${asset.class}`}>{asset.icon && !failed ? <img src={asset.icon} alt="" loading="lazy" onError={() => setFailed(true)} /> : asset.symbol ? <b>{asset.symbol.slice(0, 2)}</b> : <Boxes size={22}/>}</span>;
+type Section = 'overview' | AssetClass;
+type Tab = (typeof tabs)[number]['id'];
+type Selection = { id: string; marketPeriod?: MarketPeriod };
+
+function MarketSourceInfo({ data, section, assets, allAssets, usdRub, currency }: {
+  data: PortfolioData; section: Section; assets: Asset[]; allAssets: Asset[]; usdRub: number | null; currency: Currency;
+}) {
+  const totals = summarize(assets, usdRub, currency === 'USD');
+  const sales = summarize(allAssets, usdRub, currency === 'USD');
+  const relevant = portfolios.filter(({ id }) => section === 'overview' || section === id);
+  return <details className="panel portfolio-data">
+    <summary>Данные и расчёты <ChevronDown size={18} aria-hidden="true" /></summary>
+    <div className="portfolio-data-body">
+      <dl className="portfolio-accounting">
+        <div><dt>Вложено</dt><dd>{money(totals.cost, currency)}{totals.knownCost < totals.total && <small className="accounting-coverage">{totals.knownCost} из {totals.total} позиций</small>}</dd></div>
+        <div><dt>Нереализованный результат</dt><dd><span className={color(totals.pnl)}>{signed(totals.pnl, currency)}{totals.roi !== null && <small> {pct(totals.roi)}</small>}</span>{totals.comparableCount < totals.total && <small className="accounting-coverage">{totals.comparableCount} из {totals.total} позиций</small>}</dd></div>
+        <div><dt>Результат продаж</dt><dd><span className={color(sales.realized)}>{signed(sales.realized, currency)}</span>{sales.realizedKnownCount < allAssets.length && <small className="accounting-coverage">По известным операциям · частично</small>}</dd></div>
+      </dl>
+      <div className="portfolio-source-list">
+        {relevant.map(({ id }) => {
+          const source = data.sources[id];
+          return <div key={id}>
+            <div className="portfolio-source-title"><strong>{classNames[id]}</strong><a href={source.url} target="_blank" rel="noreferrer">{id === 'crypto' ? 'DropsTab · USD' : 'Steam Community Market · RUB'} <ArrowUpRight size={14} aria-hidden="true" /></a></div>
+            <p>Последнее наблюдение · {time(source.at, true)}</p>
+            {source.attemptedAt && (source.error || source.deliveryError) && <p>Попытка обновления · {time(source.attemptedAt, true)}</p>}
+            {source.error && <p>{source.error}</p>}
+            {source.deliveryError && <p>{source.deliveryError}</p>}
+          </div>;
+        })}
+        {section === 'overview' || section === 'crypto' ? <div><strong>Курс оценки</strong><p>{usdRub === null ? 'Нет датированного курса USD/RUB' : `1 USD = ${money(usdRub, 'RUB', 2)} · ${time(data.fxUpdatedAt, true)}`}</p>{usdRub !== null && <p>{data.fxSource}</p>}</div> : null}
+        {section === 'sandbox' && data.verifiedAt && <div><strong>Сверка инвентаря · {time(data.verifiedAt, true)}</strong>
+          {data.sandboxNotes.map(note => <p key={note}>{note}</p>)}
+          {data.verifiedInventoryUrl && <a href={data.verifiedInventoryUrl} target="_blank" rel="noreferrer">Инвентарь в Steam <ArrowUpRight size={14} aria-hidden="true" /></a>}
+        </div>}
+      </div>
+    </div>
+  </details>;
 }
-function ChangeCell({ change }: { change: PeriodChange }) {
-  const reason = change.status === 'stale' ? 'Устарело' : change.status === 'incomparable' ? 'Несопоставимо' : 'Нет истории';
-  return <span className={`change-cell ${color(change.absolute)}`} title={change.status === 'ready' ? `${time(change.from, true)} → ${time(change.to, true)}` : reason}>{change.status === 'ready' ? pct(change.percent) : <><span>—</span><small>{reason}</small></>}</span>;
-}
 
-function SortColumn({ sortKey, label, current, direction, onSort }: { sortKey: AssetSort; label: string; current: AssetSort; direction: SortDirection; onSort: (key: AssetSort) => void }) {
-  return <th aria-sort={current === sortKey ? direction === 'asc' ? 'ascending' : 'descending' : 'none'}><button className="column-sort" onClick={() => onSort(sortKey)}>{label}<span aria-hidden="true">{current === sortKey ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></button></th>;
-}
-
-export default function Dashboard({ initialData, section }: { initialData: PortfolioData; section: 'overview' | AssetClass }) {
-  const [data, setData] = useState(initialData), [theme, setTheme] = useState('light'), [view, setView] = useState('table');
-  const [options, setOptions] = useState<Record<string, Options>>({}), [ready, setReady] = useState(false);
-  const [query, setQuery] = useState(''), [sort, setSort] = useState<AssetSort>('value'), [direction, setDirection] = useState<SortDirection>('desc'), [category, setCategory] = useState('Все');
-  const [classFilter, setClassFilter] = useState('all'), [tradeType, setTradeType] = useState('all'), [tradeMonth, setTradeMonth] = useState('all');
-  const [selected, setSelected] = useState<string | null>(null), [tab, setTab] = useState('market'), [onlyPinned, setOnlyPinned] = useState(false);
+export default function Dashboard({ initialData, section, localAccess = false }: {
+  initialData: PortfolioData; section: Section; localAccess?: boolean;
+}) {
+  const [data, setData] = useState(initialData);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [view, setView] = useState<AssetView>('table');
+  const [options, setOptions] = useState<Record<string, AssetOptions>>({});
+  const [ready, setReady] = useState(false);
+  const [tab, setTab] = useState<Tab>('overview');
+  const [selection, setSelection] = useState<Selection | null>(null);
   const [addRequest, setAddRequest] = useState(0);
-  const [detailPeriod, setDetailPeriod] = useState<string>();
-  const [chartSource, setChartSource] = useState<AssetClass | 'overview'>(section);
-  const [chartMode, setChartMode] = useState(section === 'crypto' ? 'market' : 'portfolio');
-  const [limit, setLimit] = useState(16), [refreshing, setRefreshing] = useState(false), [refreshError, setRefreshError] = useState('');
-  const closeRef = useRef<HTMLButtonElement>(null), priorFocus = useRef<HTMLElement | null>(null), dialogRef = useRef<HTMLElement>(null);
-  useEffect(() => { try { const saved = JSON.parse(localStorage.getItem('tracker.v3.preferences') || '{}'); const legacy = JSON.parse(localStorage.getItem('tracker.v2.preferences') || '{}'); setTheme(saved.theme === 'dark' ? 'dark' : 'light'); saved.view ??= legacy.view; setView(saved.view || (window.innerWidth < 700 ? 'grid' : 'table')); const old = JSON.parse(localStorage.getItem('tracker.item-options.v1') || '{}'); const migrated = Object.fromEntries(Object.entries(old).map(([name, value]) => { const o = value as Options; return [`cs2:${name}`, { ...o, target: o.target === undefined ? undefined : o.target / 100 }]; })); setOptions({ ...migrated, ...JSON.parse(localStorage.getItem('tracker.v2.options') || '{}') }); } catch { /* optional preferences */ } setReady(true); }, []);
-  useEffect(() => { if (ready) try { localStorage.setItem('tracker.v3.preferences', JSON.stringify({ theme, view })); localStorage.setItem('tracker.v2.options', JSON.stringify(options)); } catch { /* browser may disallow storage */ } }, [theme, view, options, ready]);
-  useEffect(() => { setLimit(16); }, [query, category, sort, direction, classFilter, onlyPinned]);
-  useEffect(() => { if (!selected) { setDetailPeriod(undefined); return; } priorFocus.current = document.activeElement as HTMLElement; closeRef.current?.focus(); const previous = document.body.style.overflow; document.body.style.overflow = 'hidden'; const key = (event: KeyboardEvent) => { if (event.key === 'Escape') setSelected(null); if (event.key === 'Tab') { const elements = dialogRef.current?.querySelectorAll<HTMLElement>('button, a[href], input, textarea, summary, [tabindex="0"]'); if (!elements?.length) return; const first = elements[0], last = elements[elements.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } }; document.addEventListener('keydown', key); return () => { document.body.style.overflow = previous; document.removeEventListener('keydown', key); priorFocus.current?.focus(); }; }, [selected]);
-  async function refresh() { setRefreshing(true); setRefreshError(''); try { const response = await fetch('/api/portfolio', { cache: 'no-store' }); if (response.status === 401) { window.location.assign('/login'); return; } if (!response.ok) throw new Error(); const next = await response.json(); if (!Array.isArray(next.assets)) throw new Error(); setData(current => mergePortfolio(current, next)); } catch { setRefreshError('Обновление не удалось. Показан последний доступный снимок.'); } finally { setRefreshing(false); } }
-  useEffect(() => { const timer = setInterval(() => { void refresh(); }, 300000); return () => clearInterval(timer); }, []);
-  const active = data.assets.filter(a => a.quantity > 0), assets = section === 'overview' ? active : active.filter(a => a.class === section);
-  const allAssets = section === 'overview' ? data.assets : data.assets.filter(a => a.class === section);
-  const rubRate = data.fxUpdatedAt && Number.isFinite(Date.parse(data.fxUpdatedAt)) && data.usdRub && data.usdRub > 0 ? data.usdRub : null;
-  const nativeTotals = section === 'crypto' && rubRate === null;
-  const currency: Currency = nativeTotals ? 'USD' : 'RUB';
-  const unitPrice = (asset: Asset) => !rubRate || asset.currency === 'RUB'
-    ? price(asset.price, asset.currency)
-    : displayRubPrice(convert(asset.price, asset.currency, rubRate));
-  const priceHistories = useMemo(() => new Map(data.assets.map(asset => [asset.id, assetPriceHistory(asset, data.history[asset.class])])), [data.assets, data.history]);
-  const priceChanges = useMemo(() => new Map(data.assets.map(asset => [asset.id, horizons.map(horizon => periodChange(priceHistories.get(asset.id) ?? [], horizon.days))])), [data.assets, priceHistories]);
-  const totals = summarize(assets, rubRate, nativeTotals);
-  const sales = summarize(allAssets, rubRate, nativeTotals);
-  const classTotals = (id: AssetClass) => summarize(active.filter(a => a.class === id), rubRate);
-  const knownPriceCost = (asset: Asset) => asset.price !== null && asset.cost !== null ? asset.price * asset.quantity - asset.cost : null;
-  const assetValue = (a: Asset) => nativeTotals ? a.price === null ? null : a.price * a.quantity : convert(a.price === null ? null : a.price * a.quantity, a.currency, rubRate);
-  const sortChanges = useMemo(() => new Map([...priceChanges].map(([id, values]) => [id, values.map(change => change.status === 'ready' ? change.percent : null)])), [priceChanges]);
-  const filtered = assets.filter(a => (!onlyPinned || options[a.id]?.pinned) && (classFilter === 'all' || a.class === classFilter) && (category === 'Все' || a.category === category) && (a.name + ' ' + (a.symbol || '')).toLowerCase().includes(query.trim().toLowerCase())).sort((a, b) => Boolean(options[a.id]?.pinned) !== Boolean(options[b.id]?.pinned) ? options[a.id]?.pinned ? -1 : 1 : compareAssets(a, b, sort, direction, rubRate, nativeTotals, sortChanges));
-  function toggleSort(key: AssetSort) { if (sort === key) setDirection(current => current === 'asc' ? 'desc' : 'asc'); else { setSort(key); setDirection(key === 'name' ? 'asc' : 'desc'); } }
-  const sortHeading = (key: AssetSort, label: string) => <th aria-sort={sort === key ? direction === 'asc' ? 'ascending' : 'descending' : 'none'}><button className="column-sort" onClick={() => toggleSort(key)}>{label}<span aria-hidden="true">{sort === key ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></button></th>;
-  const chosen = data.assets.find(a => a.id === selected), chosenOptions = chosen ? options[chosen.id] || {} : {};
-  const updateOption = (update: Options) => chosen && setOptions(current => ({ ...current, [chosen.id]: { ...current[chosen.id], ...update } }));
-  const transactions = allAssets.flatMap(a => a.trades.map((trade, index) => ({ ...trade, asset: a, index }))).sort(newestTradeFirst);
-  const months = [...new Set(transactions.filter(t => t.date).map(tradeMonthKey))].sort().reverse();
-  const shownTrades = transactions.filter(t => (classFilter === 'all' || t.asset.class === classFilter) && (tradeType === 'all' || tradeKind(t) === tradeType) && (tradeMonth === 'all' || tradeMonthKey(t) === tradeMonth) && `${t.asset.name} ${t.asset.symbol || ''}`.toLowerCase().includes(query.trim().toLowerCase()));
-  const totalValue = classes.reduce((sum, id) => sum + (classTotals(id).value ?? 0), 0);
-  const chartCurrency: Currency = chartSource === 'crypto' ? 'USD' : 'RUB';
-  const marketHistory = useMemo(() => currentBasketHistory(data.assets.filter(a => a.class === 'crypto').map(asset => ({ ...asset, priceHistory: priceHistories.get(asset.id) }))), [data.assets, priceHistories]);
-  const marketMode = chartSource === 'crypto' && chartMode === 'market' && marketHistory.length > 1;
-  const snapshots = marketMode ? marketHistory : chartSource === 'overview' ? data.combinedHistory : data.history[chartSource];
-  const relevantClasses = section === 'overview' ? classes : [section];
-  const sourceIssues = relevantClasses.filter(id => data.sources[id].error || data.sources[id].deliveryError);
-  const valuationAt = section === 'overview' ? data.combinedHistory.at(-1)?.at : data.sources[section].at;
-  const compact = section === 'overview';
-  async function logout() { const response = await fetch('/api/auth/logout', { method: 'POST' }); if (response.ok) window.location.assign('/login'); else setRefreshError('Выход не выполнен. Повторите попытку.'); }
-  const portfolioFilter = <select aria-label="Портфель" value={classFilter} onChange={e => setClassFilter(e.target.value)}><option value="all">Все портфели</option>{classes.map(id => <option key={id} value={id}>{classNames[id]}</option>)}</select>;
-  const searchField = <label className="search-box"><Search size={17}/><input aria-label="Поиск активов" placeholder={section === 'crypto' ? 'Поиск монет' : section === 'overview' ? 'Поиск активов' : 'Поиск предметов'} value={query} onChange={e => setQuery(e.target.value)}/></label>;
+  const [chartMode, setChartMode] = useState<'portfolio' | 'market'>('portfolio');
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState('');
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const assetsTabRef = useRef<HTMLButtonElement>(null);
+  const watchTabRef = useRef<HTMLButtonElement>(null);
+  const refreshInProgress = useRef(false);
 
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('tracker.v3.preferences') || '{}');
+      const legacy = JSON.parse(localStorage.getItem('tracker.v2.preferences') || '{}');
+      setTheme(saved.theme === 'dark' ? 'dark' : 'light');
+      const savedView = saved.view ?? legacy.view;
+      setView(savedView === 'table' || savedView === 'grid' ? savedView : window.innerWidth < 700 ? 'grid' : 'table');
+      const old = JSON.parse(localStorage.getItem('tracker.item-options.v1') || '{}');
+      const migrated = Object.fromEntries(Object.entries(old).map(([name, value]) => {
+        const option = value as AssetOptions;
+        return [`cs2:${name}`, { ...option, target: option.target === undefined ? undefined : option.target / 100 }];
+      }));
+      setOptions({ ...migrated, ...JSON.parse(localStorage.getItem('tracker.v2.options') || '{}') });
+    } catch { /* Optional browser preferences. */ }
+    setReady(true);
+  }, []);
 
-  const title = section === 'overview' ? 'Обзор капитала' : classNames[section];
-  const icons = { overview: ChartNoAxesCombined, cs2: Gamepad2, sandbox: Layers3, crypto: Coins };
-  const largest = [...assets].filter(a => assetValue(a) !== null).sort((a, b) => assetValue(b)! - assetValue(a)!).slice(0, 5);
-  const staleCount = assets.filter(a => a.price !== null && stale(a.updatedAt)).length;
-  const chosenShare = chosen && totals.value && assetValue(chosen) !== null ? assetValue(chosen)! / totals.value * 100 : null;
-  const shareText = (value: number | null) => value === null || !totals.value ? '—' : `${number(value / totals.value * 100)}%`;
-  let donutOffset = 0;
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      localStorage.setItem('tracker.v3.preferences', JSON.stringify({ theme, view }));
+      localStorage.setItem('tracker.v2.options', JSON.stringify(options));
+    } catch { /* Storage can be unavailable. */ }
+  }, [theme, view, options, ready]);
+
+  useEffect(() => {
+    if (!selection) return;
+    const priorFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setSelection(null);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const elements = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, [tabindex="0"]',
+      ) ?? []).filter(element => element.getClientRects().length > 0);
+      const first = elements[0], last = elements.at(-1);
+      if (event.shiftKey && first && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && last && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKey);
+      priorFocus?.focus({ preventScroll: true });
+    };
+  }, [selection]);
+
+  async function refresh() {
+    if (refreshInProgress.current) return;
+    refreshInProgress.current = true;
+    setRefreshing(true);
+    setRefreshError('');
+    try {
+      const response = await fetch('/api/portfolio', { cache: 'no-store' });
+      if (response.status === 401) {
+        window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      if (!response.ok) throw new Error();
+      const next: PortfolioData = await response.json();
+      if (!Array.isArray(next.assets)) throw new Error();
+      setData(current => mergePortfolio(current, next));
+    } catch {
+      setRefreshError('Не удалось обновить портфель. Показаны сохранённые данные.');
+    } finally {
+      refreshInProgress.current = false;
+      setRefreshing(false);
+    }
+  }
+  useEffect(() => {
+    const timer = setInterval(() => { void refresh(); }, 300000);
+    return () => clearInterval(timer);
+  }, []);
+
+  async function logout() {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (!response.ok) throw new Error();
+      window.location.assign('/login');
+    } catch {
+      setRefreshError('Не удалось завершить сеанс. Повторите попытку.');
+    }
+  }
+
+  const allAssets = useMemo(() => section === 'overview' ? data.assets : data.assets.filter(asset => asset.class === section), [data.assets, section]);
+  const active = useMemo(() => allAssets.filter(asset => asset.quantity > 0), [allAssets]);
+  const histories = useMemo(() => new Map(data.assets.map(asset => [asset.id, assetPriceHistory(asset, data.history[asset.class])])), [data.assets, data.history]);
+  const usdRub = data.fxUpdatedAt && Number.isFinite(Date.parse(data.fxUpdatedAt)) && data.usdRub && data.usdRub > 0 ? data.usdRub : null;
+  const currency: Currency = section === 'crypto' && usdRub === null ? 'USD' : 'RUB';
+  const totals = summarize(active, usdRub, currency === 'USD');
+  const positionValue = (asset: Asset) => {
+    const native = asset.price === null ? null : asset.price * asset.quantity;
+    return currency === 'USD' ? native : convert(native, asset.currency, usdRub);
+  };
+  const chosen = data.assets.find(asset => asset.id === selection?.id);
+  const chosenValue = chosen ? positionValue(chosen) : null;
+  const chosenShare = chosenValue !== null && totals.value ? chosenValue / totals.value * 100 : null;
+  const snapshots = section === 'overview' ? data.combinedHistory : data.history[section];
+  const basket = useMemo(() => section === 'crypto'
+    ? currentBasketHistory(active.map(asset => ({ ...asset, priceHistory: histories.get(asset.id) })))
+    : [], [section, active, histories]);
+  const showBasket = chartMode === 'market' && basket.length > 1;
+  const savedQuotes = active.some(asset => asset.price !== null && stale(asset.updatedAt));
+  const sourceIssue = portfolios.some(({ id }) => (section === 'overview' || section === id) && (data.sources[id].error || data.sources[id].deliveryError));
+  const week = tab === 'overview' ? periodChange(snapshots, 7) : null;
+  const hasWeek = week?.status === 'ready' && week.percent !== null;
+  const stamp = snapshots.at(-1)?.at;
+  const period = selection?.marketPeriod;
+  const detailPeriod = period === 1 ? 'day' : period === 7 || period === 'latest' ? 'week' : period === 30 ? 'month' : undefined;
+  const portfolioName = section === 'overview' ? 'Обзор' : classNames[section];
+  const title = section === 'overview' ? 'Обзор портфеля' : portfolioName;
+  const leaders = tab === 'overview' && section !== 'overview'
+    ? active.map(asset => ({ asset, value: positionValue(asset) })).sort((a, b) => (b.value ?? -1) - (a.value ?? -1)).slice(0, 4) : [];
+  const openAsset = (id: string, marketPeriod?: MarketPeriod) => setSelection({ id, marketPeriod });
 
   return <div className={`tracker theme-${theme}`}>
-    <aside className="app-sidebar" inert={Boolean(chosen)}>
-      <Link href="/" className="brand"><span className="brand-mark"><ChartNoAxesCombined size={22}/></span><span>Tracker<small>Личный капитал</small></span></Link>
-      <div className="sidebar-label">Рабочее пространство</div>
-      <nav aria-label="Разделы портфеля">{sections.map(({ id, href, name }) => { const Icon = icons[id]; return <Link key={id} href={href} className={section === id ? 'active' : ''} aria-current={section === id ? 'page' : undefined}><Icon size={19}/><span>{name}</span>{id !== 'overview' && <small>{active.filter(a => a.class === id).length}</small>}</Link>; })}</nav>
-      <div className="sidebar-divider"/>
-      <button className={`sidebar-saved ${onlyPinned ? 'active' : ''}`} aria-label="Закреплённые активы" aria-pressed={onlyPinned} onClick={() => { setOnlyPinned(!onlyPinned); setTab('assets'); }}><Pin size={18}/><span>Закреплённые</span><small>{assets.filter(a => options[a.id]?.pinned).length}</small></button>
-      <div className="sidebar-bottom">
-        <div className="sidebar-sources"><div className="sidebar-label">Источники котировок</div><span><i className={`status-dot ${stale(data.sources.cs2.at) ? 'is-stale' : ''}`}/>Steam Community Market<small>RUB</small></span><span><i className={`status-dot ${stale(data.sources.crypto.at) ? 'is-stale' : ''}`}/>DropsTab<small>USD</small></span></div>
-        <Link href="/welcome" className="sidebar-about"><CircleHelp size={17}/> О трекере<ArrowUpRight size={15}/></Link>
-        <div className="sidebar-profile"><span className="profile-avatar"><UserRound size={18}/></span><span>Мой портфель<small>Личное пространство</small></span><button className="icon-button" aria-label={theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему'} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}</button><button className="icon-button" aria-label="Выйти из портфеля" onClick={logout}><LogOut size={17}/></button></div>
-      </div>
-    </aside>
-    <div className="app-content" inert={Boolean(chosen)}>
-      <header className="workspace-topbar"><div className="breadcrumb"><span>Личный капитал</span><ChevronRight size={13}/><strong>{section === 'overview' ? 'Обзор' : classNames[section]}</strong></div><div className="topbar-actions"><span className={`quote-status ${staleCount ? 'is-stale' : ''}`}><i className={`status-dot ${staleCount ? 'is-stale' : ''}`}/>{staleCount ? 'Есть сохранённые цены' : 'Котировки актуальны'}</span><button className="refresh-button" onClick={refresh} disabled={refreshing} aria-label="Обновить портфель"><RefreshCw size={15} className={refreshing ? 'spinning' : ''}/>{refreshing ? 'Обновление…' : 'Обновить'}</button></div></header>
-      <main className="workspace">
-        <section className="page-heading">
-          <div><h1>{title}</h1><p>Последний снимок · {time(valuationAt, true)}</p></div>
-          {section !== 'crypto' && tab !== 'watch' && <button className="heading-action" onClick={() => { setAddRequest(value => value + 1); setTab('watch'); }}><Plus size={17} aria-hidden="true"/>Добавить предмет</button>}
-        </section>
-        {refreshError && <div className="notice" role="status">{refreshError}</div>}
-        {(sourceIssues.length > 0 || staleCount > 0 || !totals.complete) && <details className="source-status"><summary><Activity size={15}/><span>{!totals.complete ? `Оценено ${totals.priced} из ${totals.total} позиций` : 'Котировки сохранены'}{staleCount > 0 && ` · ${staleCount} с устаревшей ценой`}</span><span className="status-details-label">Подробнее</span></summary><div className="source-status-body">{relevantClasses.map(id => <p key={id}><strong>{classNames[id]}</strong> · {data.sources[id].name} · {time(data.sources[id].at, true)}{data.sources[id].error && <span>{data.sources[id].error}</span>}{data.sources[id].deliveryError && <span>{data.sources[id].deliveryError}</span>}</p>)}<p>«Обновить» загружает последний опубликованный снимок. Сохранённые котировки не выдаются за новые.</p></div></details>}
-        {section === 'sandbox' && <details className="inventory-note"><summary>Инвентарь сверен {time(data.verifiedAt, true)} · история операций частичная</summary>{data.sandboxNotes.map(note => <p key={note}>{note}</p>)}{data.verifiedInventoryUrl && <a href={data.verifiedInventoryUrl} target="_blank" rel="noreferrer">Открыть инвентарь <ExternalLink size={13}/></a>}</details>}
-        <section className="metric-strip" aria-label="Итоги портфеля">
-          <div className="metric-primary"><span>{totals.complete ? 'Стоимость портфеля' : 'Оценённая часть портфеля'}</span><strong>{money(totals.value, currency)}</strong><small>{countLabel(totals.total, ['позиция', 'позиции', 'позиций'])}<span className="metric-separator">·</span>{nativeTotals ? 'USD · нет датированного курса' : 'Оценка в рублях'}{(section === 'overview' || section === 'crypto') && rubRate && <><br/>Курс DropsTab на {time(data.fxUpdatedAt, true)} · {money(rubRate, 'RUB', 2)} за $1</>}</small></div>
-          <div><span>Вложено в остаток</span><strong>{money(totals.cost, currency)}</strong><small>{totals.knownCost < totals.total ? `Известно у ${totals.knownCost} из ${totals.total} позиций` : 'В открытые позиции'}</small></div>
-          <div><span>Нереализованный результат</span><strong className={color(totals.pnl)}>{signed(totals.pnl, currency)}</strong><small><span className={`return-badge ${color(totals.pnl)}`}>{pct(totals.roi)}</span>{totals.comparableCount < totals.total && ` · ${totals.comparableCount}/${totals.total} позиций`}</small></div>
-          <div><span>Результат продаж</span><strong className={color(sales.realized)}>{signed(sales.realized, currency)}</strong><small>{sales.realizedKnownCount < allAssets.length ? 'По известным операциям · частично' : 'За всю историю операций'}</small></div>
-        </section>
-        <nav className="workspace-nav" aria-label="Представление портфеля">
-          <button aria-pressed={tab === 'market'} onClick={() => setTab('market')}><Activity size={15}/>Обзор рынка</button>
-          <button aria-pressed={tab === 'assets'} onClick={() => setTab('assets')}><Boxes size={15}/>Активы · {assets.length}</button>
-          {section !== 'crypto' && <button aria-pressed={tab === 'watch'} onClick={() => { setAddRequest(0); setTab('watch'); }}><Bookmark size={15}/>Наблюдения</button>}
-          <button aria-pressed={tab === 'trades'} onClick={() => setTab('trades')}><History size={15}/>Операции</button>
+    <header className="tracker-header" inert={Boolean(chosen)}>
+      <div className="tracker-header-inner">
+        <Link href="/" className="tracker-brand" aria-label="Tracker, главная">
+          <span className="brand-mark"><ChartNoAxesCombined size={21} strokeWidth={2.5} aria-hidden="true" /></span>
+          <span>Tracker<span className="brand-period">.</span></span>
+        </Link>
+        <nav className="tracker-nav" aria-label="Портфели">
+          <Link href="/" aria-current={section === 'overview' ? 'page' : undefined}><ChartNoAxesCombined size={17} aria-hidden="true" />Обзор</Link>
+          {portfolios.map(({ id, href, Icon }) => <Link key={id} href={href} aria-current={section === id ? 'page' : undefined}>
+            <Icon size={17} aria-hidden="true" />{id === 'crypto' ? 'Крипто' : classNames[id]}
+          </Link>)}
         </nav>
-        {tab === 'watch' && section !== 'crypto' && <TrackedItems key={addRequest} section={section} assets={data.assets} priceHistories={priceHistories} initialAdding={addRequest > 0}/>}
-        {tab === 'market' && <>
-          <MarketMovers assets={assets} histories={priceHistories} onSelect={(id, period) => {
-            setDetailPeriod(period === 1 ? 'day' : period === 30 ? 'month' : 'week');
-            setSelected(id);
-          }}/>
-          <section className="analytics-grid">
-            <div className="panel chart-panel">
-              {section === 'overview' && <div className="chart-source-tabs" role="group" aria-label="Активы на графике">{[['overview', 'Весь портфель'], ['cs2', 'CS2'], ['sandbox', 'Sandbox'], ['crypto', 'Криптовалюты']].map(([id, label]) => <button key={id} aria-pressed={chartSource === id} onClick={() => setChartSource(id as typeof chartSource)}>{label}</button>)}</div>}
-              <HistoryChart key={`${chartSource}-${marketMode}`} initialPeriod={marketMode ? 'year' : 'month'} title={marketMode ? 'Динамика текущего состава' : chartSource === 'overview' ? 'Динамика капитала' : chartSource === 'crypto' ? 'Стоимость криптовалют' : `Стоимость ${classNames[chartSource]}`} snapshots={snapshots} currency={chartCurrency}/>
-              {chartSource === 'crypto' && marketHistory.length > 1 && <><div className="chart-mode" role="group" aria-label="Тип истории"><button aria-pressed={marketMode} onClick={() => setChartMode('market')}>Текущий состав за год</button><button aria-pressed={!marketMode} onClick={() => setChartMode('portfolio')}>Снимки портфеля</button></div>{marketMode && <p className="source-footnote">Цены DropsTab × сегодняшние остатки, USD. Исторические покупки и количества не восстанавливаются.</p>}</>}
-              <details className="portfolio-dynamics"><summary>Сравнение за 24 ч, 7 и 30 дней</summary><PeriodSummary snapshots={snapshots} currency={chartCurrency}/></details>
-            </div>
-            <aside className="panel allocation-panel"><div className="panel-heading"><h2>{section === 'overview' ? 'Структура капитала' : 'Крупнейшие позиции'}</h2><span>{section === 'overview' ? 'RUB' : currency}</span></div>
-              {section === 'overview' ? <>
-                <div className="allocation-visual"><svg viewBox="0 0 112 112" role="img" aria-label="Доли оценённой части портфеля: CS2, Sandbox и криптовалюты"><circle cx="56" cy="56" r="44" className="donut-track"/>{classes.map(id => { const s = classTotals(id); const share = totalValue > 0 && s.value !== null ? s.value / totalValue : 0; const offset = donutOffset; donutOffset += share * 276.46; return <circle key={id} cx="56" cy="56" r="44" className={`donut-segment ${id}`} strokeDasharray={`${Math.max(0, share * 276.46 - 3)} ${276.46}`} strokeDashoffset={-offset} transform="rotate(-90 56 56)"><title>{`${classNames[id]}: ${number(share * 100)}%`}</title></circle>; })}</svg><div className="donut-center"><strong>3</strong><span>портфеля</span></div></div>
-                <div className="allocation-legend">{classes.map(id => { const s = classTotals(id); return <Link href={`/${id}`} className={`allocation-row ${id}`} key={id}><i className="class-dot"/><span>{classNames[id]}<small>{money(s.value)}{!s.complete && ' · частично'}</small></span><strong>{totalValue > 0 && s.value !== null ? `${number(s.value / totalValue * 100)}%` : '—'}</strong></Link>; })}</div><p className="source-footnote">{totals.complete ? 'Доли от текущей стоимости.' : 'Доли только оценённой части.'}</p>
-              </> : <div className="concentration-list">{largest.map((asset, index) => <button key={asset.id} onClick={() => setSelected(asset.id)}><span className="position-rank">0{index + 1}</span><AssetImage asset={asset}/><span className="concentration-name">{asset.name}<small>{money(assetValue(asset), currency)}</small></span><strong>{shareText(assetValue(asset))}</strong><span className="weight-track"><i style={{ width: shareText(assetValue(asset)) === '—' ? '0%' : shareText(assetValue(asset)) }}/></span></button>)}{largest.length === 0 && <p className="source-footnote">Пока нет позиций с известной стоимостью.</p>}<p className="source-footnote">Доля в оценённой части портфеля. Нажмите на актив для подробностей.</p></div>}
-            </aside>
-          </section>
-          {section === 'overview' && <details className="portfolio-breakdown"><summary>Вложено и результат по портфелям</summary><section className="portfolio-cards" aria-label="Портфели">{classes.map(id => { const s = classTotals(id); const Icon = icons[id]; return <Link href={`/${id}`} className={`portfolio-card ${id}`} key={id}><div className="portfolio-card-top"><span className="class-icon"><Icon size={18}/></span><h2>{classNames[id]}</h2><ArrowUpRight size={17}/></div><strong>{money(s.value)}<small>{!s.complete && 'Частичная оценка'}</small></strong><div className="portfolio-card-bottom"><span className={color(s.pnl)}>{signed(s.pnl)} <small>{pct(s.roi)}</small></span><span>{s.total} поз.</span></div><div className="portfolio-card-cost">Вложено {money(s.cost)}{s.knownCost < s.total && ' · частично'}</div></Link>; })}</section></details>}
-        </>}
-        {(tab === 'assets' || tab === 'trades') && <section className="panel assets-panel">
-          <div className="list-heading"><h2>{tab === 'assets' ? 'Активы портфеля' : 'История операций'}</h2><span>{tab === 'assets' ? assets.length : transactions.length}</span>{onlyPinned && tab === 'assets' && <button className="clear-filter" onClick={() => setOnlyPinned(false)}><Pin size={13}/>Закреплённые<X size={13}/></button>}</div>
-          <div className="asset-toolbar">{searchField}{section === 'overview' ? portfolioFilter : tab === 'assets' && <select aria-label="Категория активов" value={category} onChange={e => setCategory(e.target.value)}><option value="Все">Все {section === 'crypto' ? 'активы' : 'категории'}</option>{[...new Set(assets.map(a => a.category))].map(c => <option key={c}>{c}</option>)}</select>}
-            {tab === 'assets' ? <><select aria-label="Сортировка активов" value={sort} onChange={e => { setSort(e.target.value as AssetSort); setDirection(e.target.value === 'name' ? 'asc' : 'desc'); }}><option value="value">Стоимость позиции</option><option value="price">Цена за единицу</option><option value="pnl">Прибыль / убыток</option><option value="roi">Доходность, %</option><option value="cost">Вложенная сумма</option><option value="average">Средняя покупка</option><option value="quantity">Количество</option><option value="name">Название</option><option value="change0">Динамика за 24 ч</option><option value="change1">Динамика за 7 д</option><option value="change2">Динамика за 30 д</option></select><button className="sort-direction" aria-label={direction === 'desc' ? 'По убыванию: переключить на возрастание' : 'По возрастанию: переключить на убывание'} onClick={() => setDirection(d => d === 'asc' ? 'desc' : 'asc')}>{direction === 'desc' ? '↓' : '↑'}</button><div className="view-switch"><button aria-label="Табличный вид" aria-pressed={view === 'table'} onClick={() => setView('table')}><List size={17}/></button><button aria-label="Плиточный вид" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><LayoutGrid size={17}/></button></div></> : <><select aria-label="Тип операции" value={tradeType} onChange={e => setTradeType(e.target.value)}><option value="all">Все операции</option><option value="buy">Покупки</option><option value="sell">Продажи</option>{[...new Set(transactions.map(tradeKind))].filter(type => !['buy', 'sell'].includes(type)).map(type => <option key={type} value={type}>{type === 'airdrop' ? 'Airdrop' : type}</option>)}</select><select aria-label="Период операций" value={tradeMonth} onChange={e => setTradeMonth(e.target.value)}><option value="all">Все даты</option>{months.map(month => <option key={month} value={month}>{new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric', timeZone: 'Europe/Astrakhan' }).format(new Date(`${month}-15T12:00:00Z`))}</option>)}{transactions.some(t => !t.date) && <option value="unknown">Дата не определена</option>}</select></>}
+        <div className="tracker-header-actions">
+          <button className="icon-button" type="button" title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'} aria-label={theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему'} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+            {theme === 'light' ? <Moon size={19} aria-hidden="true" /> : <Sun size={19} aria-hidden="true" />}
+          </button>
+          <button className="quiet-button refresh-button" type="button" onClick={refresh} disabled={refreshing} aria-label="Обновить портфель">
+            <RefreshCw size={17} aria-hidden="true" className={refreshing ? 'spinning' : ''} /><span>{refreshing ? 'Обновление…' : 'Обновить'}</span>
+          </button>
+          {!localAccess && <button className="icon-button" type="button" title="Выйти" aria-label="Выйти из портфеля" onClick={logout}><LogOut size={18} aria-hidden="true" /></button>}
+        </div>
+      </div>
+    </header>
+    <main className="workspace" inert={Boolean(chosen)}>
+      <div className="page-heading">
+        <div>
+          <h1>{title}</h1>
+          <div className="page-status">
+            {stamp && <span><Clock3 size={15} aria-hidden="true" />Снимок от {time(stamp)}</span>}
+            {(savedQuotes || sourceIssue) && <span className="stale-label"><i aria-hidden="true" />Сохранённые котировки</span>}
           </div>
-          {tab === 'assets' ? <>{filtered.length === 0 ? <div className="empty-list"><Search size={23}/><strong>{onlyPinned ? 'Нет закреплённых активов' : 'Активы не найдены'}</strong><p>{onlyPinned ? 'Откройте предмет и нажмите на значок закрепления.' : 'Попробуйте другое название или измените фильтры.'}</p><button onClick={() => { setQuery(''); setCategory('Все'); setClassFilter('all'); setOnlyPinned(false); }}>Сбросить фильтры</button></div> : view === 'table' ? <div className="table-scroll" tabIndex={0} aria-label="Таблица активов"><table className={`asset-table ${compact ? 'compact-assets' : ''}`}><thead><tr>{sortHeading('name', 'Актив')}{sortHeading('quantity', 'Кол-во')}{sortHeading('price', 'Цена / шт.')}<th>История цены</th>{!compact && <SortColumn sortKey="change2" label="30 д" current={sort} direction={direction} onSort={toggleSort}/>}{sortHeading('cost', 'Вложено')}{sortHeading('value', 'Стоимость')}{sortHeading('pnl', 'Результат')}</tr></thead><tbody>{filtered.slice(0, limit).map(a => { const p = assetPnl(a, rubRate, nativeTotals); return <tr key={a.id}><td><button className="asset-name" title={a.name} onClick={() => setSelected(a.id)}><AssetImage asset={a}/><span><span className="asset-title">{a.name}{options[a.id]?.pinned && <Pin size={11}/>}</span><small>{section === 'overview' ? classNames[a.class] : a.category}{a.symbol && ` · ${a.symbol}`}</small></span></button></td><td title={number(a.quantity, 10)}>{number(a.quantity, a.class === 'crypto' ? 4 : 2)}</td><td className="unit-price-cell">{unitPrice(a)}<small>{a.class === 'crypto' && rubRate ? price(a.price, a.currency) + ' · DropsTab' : 'Ср. ' + price(a.averageBuyPrice, a.currency)}</small></td><td><button className="sparkline-button" aria-label={`График цены ${a.name}`} onClick={() => setSelected(a.id)}><AssetSparkline snapshots={priceHistories.get(a.id) ?? []} name={a.name}/></button></td>{!compact && <td><ChangeCell change={priceChanges.get(a.id)![2]}/></td>}<td>{money(nativeTotals ? a.cost : convert(a.cost, a.currency, rubRate), currency, 2)}{a.cost === null && <small>Нет себестоимости</small>}</td><td className="position-amount">{money(assetValue(a), currency, 2)}<small>{assetValue(a) === null ? a.price === null ? 'Нет котировки' : 'Нет курса USD/RUB' : shareText(assetValue(a)) + ' портфеля'}</small></td><td><span className={color(p)}>{signed(p, currency, 2)}</span><small className={color(p)}>{a.cost === null ? 'Нет себестоимости' : a.price === null ? 'Нет котировки' : a.cost > 0 ? pct(p === null ? null : knownPriceCost(a)! / a.cost * 100) : 'Без затрат на покупку'}</small></td></tr>; })}</tbody></table></div> : <div className="asset-cards">{filtered.slice(0, limit).map(a => <button className="asset-card" key={a.id} onClick={() => setSelected(a.id)}><div className="asset-card-top"><AssetImage asset={a}/><span>{classNames[a.class]}{a.symbol && ` · ${a.symbol}`}</span>{options[a.id]?.pinned && <Pin size={14}/>}<ArrowUpRight size={16}/></div><h3>{a.name}</h3><p>{number(a.quantity, a.class === 'crypto' ? 8 : 2)} {a.symbol || 'шт.'}</p><strong className="asset-card-value">{money(assetValue(a), currency, 2)}</strong><div className={`asset-card-result ${color(assetPnl(a, rubRate, nativeTotals))}`}>{signed(assetPnl(a, rubRate, nativeTotals), currency, 2)} <small>{pct(a.cost && knownPriceCost(a) !== null ? knownPriceCost(a)! / a.cost * 100 : null)}</small></div><AssetSparkline snapshots={priceHistories.get(a.id) ?? []} name={a.name}/><div className="card-price-change">{priceChanges.get(a.id)?.map((change, i) => <span key={horizons[i].days}><small>{horizons[i].label}</small><ChangeCell change={change}/></span>)}</div><div className="asset-card-foot"><span>Цена / шт.<b>{unitPrice(a)}</b></span><span>Вложено<b>{money(nativeTotals ? a.cost : convert(a.cost, a.currency, rubRate), currency)}</b></span></div></button>)}</div>}
-            <div className="table-footer"><p>{countLabel(filtered.length, ['позиция', 'позиции', 'позиций'])}{filtered.length > limit && ` · показано ${limit}`}</p><span>Нажмите на актив для полной статистики<ArrowUpRight size={13}/></span></div>{filtered.length > limit && <button className="load-more" onClick={() => setLimit(l => l + 24)}>Показать ещё {Math.min(24, filtered.length - limit)}<ArrowRight size={15}/></button>}</> : <>{shownTrades.length === 0 ? <div className="empty-list">Операций нет по выбранным фильтрам.</div> : <div className="table-scroll" tabIndex={0} aria-label="История операций"><table className="trades-table"><thead><tr><th>Актив / операция</th><th>Дата ↓</th><th>Количество</th><th>Цена / шт.</th><th>Сумма</th><th>Комиссия</th></tr></thead><tbody>{shownTrades.map(t => <tr key={`${t.asset.id}-${t.index}`}><td><button className="trade-name" onClick={() => setSelected(t.asset.id)}><AssetImage asset={t.asset}/><span>{t.asset.name}<small><span className={`trade-badge ${t.type}`}>{tradeLabel(t)}</span>{section === 'overview' && ` · ${classNames[t.asset.class]}`}{tradeSource(t) && ` · ${tradeSource(t)}`}</small></span></button></td><td>{tradeDate(t)}</td><td>{number(t.quantity, 10)}</td><td>{price(t.unitPrice, t.currency)}{t.purpose === 'AIRDROP' && <small>Оценка источника</small>}</td><td>{money(t.total, t.currency, 2)}</td><td>{feeText(t)}{t.feeUnknown && <small>Нет данных</small>}</td></tr>)}</tbody></table></div>}<p className="table-footnote">{countLabel(shownTrades.length, ['операция', 'операции', 'операций'])} · Даты и суммы сохранены из исходных записей.{allAssets.some(a => a.historyIncomplete) && ' История Sandbox неполная.'} Комиссия «—»: нет данных.</p></>}
+        </div>
+        {section !== 'crypto' && tab !== 'watch' && <button type="button" className="primary-button" onClick={() => {
+          setAddRequest(value => value + 1);
+          setTab('watch');
+          watchTabRef.current?.focus();
+        }}><Plus size={18} aria-hidden="true" /><span>Добавить предмет</span></button>}
+      </div>
+      {refreshError && <p className="refresh-error" role="alert">{refreshError}</p>}
+      <nav className="workspace-nav" aria-label="Представление портфеля">
+        {tabs.filter(({ id }) => id !== 'watch' || section !== 'crypto').map(({ id, label, Icon }) => <button
+          key={id} ref={id === 'assets' ? assetsTabRef : id === 'watch' ? watchTabRef : undefined} type="button" aria-pressed={tab === id}
+          onClick={() => { setTab(id); if (id === 'watch' && tab !== 'watch') setAddRequest(0); }}>
+          <Icon size={17} aria-hidden="true" />{label}
+        </button>)}
+      </nav>
+      {tab === 'overview' && <>
+        <div className="primary-grid">
+          <section className="panel summary-chart" aria-label="Стоимость и история портфеля">
+            <div className="valuation">
+              <h2>{totals.complete ? 'Стоимость портфеля' : 'Оценённая часть портфеля'}</h2>
+              <strong>{money(totals.value, currency)}</strong>
+              <div className="valuation-meta">
+                {hasWeek && <span className={`valuation-trend ${color(week.absolute)}`}>{pct(week.percent)} за 7 д</span>}
+                <span>{totals.complete ? countLabel(totals.total, ['позиция', 'позиции', 'позиций']) : `Оценено ${totals.priced} из ${totals.total} позиций`}</span>
+                {currency === 'USD' && <span>Нет курса USD/RUB</span>}
+              </div>
+            </div>
+            <HistoryChart key={showBasket ? 'basket' : section} compact title={showBasket ? 'Текущий состав по прошлым ценам' : 'История стоимости'} snapshots={showBasket ? basket : snapshots} currency={section === 'crypto' ? 'USD' : 'RUB'} initialPeriod={showBasket ? 'year' : 'month'} />
+            {section === 'crypto' && basket.length > 1 && <div className="chart-switch">
+              <label>Тип графика <select value={showBasket ? 'market' : 'portfolio'} onChange={event => setChartMode(event.target.value === 'market' ? 'market' : 'portfolio')}>
+                <option value="portfolio">Снимки портфеля</option><option value="market">Цены на текущий состав</option>
+              </select></label>
+              {showBasket && <p>Исторические цены DropsTab × нынешние остатки, в USD.</p>}
+            </div>}
+          </section>
+          <MarketMovers assets={active} histories={histories} onSelect={openAsset} />
+        </div>
+        {section === 'overview' ? <section className="overview-section" aria-labelledby="portfolios-title">
+          <div className="section-heading"><h2 id="portfolios-title">Портфели</h2></div>
+          <div className="portfolio-cards">{portfolios.map(({ id, href, Icon }) => {
+            const native = id === 'crypto' && usdRub === null;
+            const summary = summarize(active.filter(asset => asset.class === id), usdRub, native);
+            return <Link className={`panel portfolio-card ${id}`} href={href} key={id}>
+              <div className="portfolio-card-top"><span className="class-icon"><Icon size={20} aria-hidden="true" /></span><h3>{classNames[id]}</h3><ArrowUpRight size={20} aria-hidden="true" /></div>
+              <strong>{money(summary.value, native ? 'USD' : 'RUB')}</strong>
+              <span className="portfolio-card-meta">{countLabel(summary.total, ['позиция', 'позиции', 'позиций'])}{!summary.complete && ' · Частичная оценка'}</span>
+            </Link>;
+          })}</div>
+        </section> : <section className="overview-section" aria-labelledby="leaders-title">
+          <div className="section-heading"><h2 id="leaders-title">Крупнейшие позиции</h2><button type="button" className="quiet-button" onClick={() => {
+            setTab('assets');
+            assetsTabRef.current?.focus();
+          }}>Все активы <ArrowRight size={16} aria-hidden="true" /></button></div>
+          <div className="panel asset-preview">
+            {leaders.length ? leaders.map(({ asset, value }) => <button type="button" className="asset-preview-row" onClick={() => openAsset(asset.id)} key={asset.id}>
+              <AssetImage asset={asset} /><span><strong>{asset.name}</strong><small>{asset.symbol || asset.category}</small></span>
+              <strong>{money(value, currency, 2)}</strong><ArrowUpRight size={17} aria-hidden="true" />
+            </button>) : <p>Пока нет открытых позиций.</p>}
+          </div>
         </section>}
-        <footer className="page-footer"><span>Steam Market · RUB · до комиссии<br/>DropsTab · USD</span>{section === 'overview' && <span>Курс оценки: 1 USD = {money(data.usdRub, 'RUB', 2)}<br/>{data.fxSource.toLowerCase().includes('dropstab') ? 'DropsTab' : data.fxSource} · {time(data.fxUpdatedAt, true)}</span>}<span>История состоит из реальных наблюдений.<br/>Неизвестные значения обозначены «—».</span></footer>
-      </main>
-    </div>
-    {chosen && <AssetDetails key={chosen.id} asset={chosen} snapshots={priceHistories.get(chosen.id) ?? []} options={chosenOptions} share={chosenShare} initialPeriod={detailPeriod} usdRub={rubRate} fxUpdatedAt={data.fxUpdatedAt} closeRef={closeRef} dialogRef={dialogRef} onClose={() => setSelected(null)} onChange={updateOption}/>}
+      </>}
+      {tab === 'assets' && <AssetList assets={active} histories={histories} options={options} section={section} usdRub={usdRub} currency={currency} view={view} onViewChange={setView} onSelect={openAsset} />}
+      {tab === 'trades' && <TradeList assets={allAssets} overview={section === 'overview'} onSelect={openAsset} />}
+      {tab === 'watch' && section !== 'crypto' && <TrackedItems key={addRequest} section={section} assets={data.assets} priceHistories={histories} initialAdding={addRequest > 0} />}
+      {tab === 'overview' && <MarketSourceInfo data={data} section={section} assets={active} allAssets={allAssets} usdRub={usdRub} currency={currency} />}
+      <footer className="page-footer"><span>{section === 'crypto' ? 'DropsTab · USD' : section === 'overview' ? 'Steam Community Market · RUB / DropsTab · USD' : 'Steam Community Market · RUB'}</span><Link href="/welcome">О Tracker <ArrowUpRight size={14} aria-hidden="true" /></Link></footer>
+    </main>
+    {chosen && <AssetDetails
+      key={chosen.id} asset={chosen} snapshots={histories.get(chosen.id) ?? []} options={options[chosen.id] ?? {}}
+      share={chosenShare} initialPeriod={detailPeriod} marketPeriod={period} usdRub={usdRub} fxUpdatedAt={data.fxUpdatedAt}
+      closeRef={closeRef} dialogRef={dialogRef} onClose={() => setSelection(null)}
+      onChange={update => setOptions(current => ({ ...current, [chosen.id]: { ...current[chosen.id], ...update } }))}
+    />}
   </div>;
 }

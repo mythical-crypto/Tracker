@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { randomBytes, scryptSync } from 'node:crypto';
 import {
   authenticateCredentials,
+  canAccessTracker,
   createSessionCookie,
   createSessionValue,
+  hasLocalTrackerAccess,
   isAuthenticatedCookie,
   isLoginRateLimited,
   MAX_AUTH_BODY_BYTES,
@@ -53,6 +55,47 @@ test('cookie parsing rejects duplicates and cookie is HttpOnly, SameSite Lax', (
   assert.equal(cookie.options.httpOnly, true);
   assert.equal(cookie.options.sameSite, 'lax');
   assert.equal(cookie.options.secure, false);
+});
+
+test('local development accepts only direct loopback requests without a session', t => {
+  const originalMode = process.env.NODE_ENV;
+  const originalVercel = process.env.VERCEL;
+  t.after(() => {
+    if (originalMode === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalMode;
+    if (originalVercel === undefined) delete process.env.VERCEL;
+    else process.env.VERCEL = originalVercel;
+  });
+  process.env.NODE_ENV = 'development';
+  delete process.env.VERCEL;
+
+  const loopback = new Headers({ host: '127.0.0.1:3000' });
+  const frameworkHeaders = new Headers({ host: 'localhost:3000', 'x-forwarded-host': 'localhost:3000', 'x-forwarded-for': '127.0.0.1', 'x-forwarded-proto': 'http', origin: 'http://localhost:3000' });
+  assert.equal(canAccessTracker(loopback), true);
+  assert.equal(canAccessTracker(frameworkHeaders), true);
+  for (const headers of [
+    { 'x-forwarded-host': '127.0.0.1:3000' },
+    { host: 'tracker.example', 'x-forwarded-host': '127.0.0.1:3000' },
+    { host: '127.0.0.1.example:3000' },
+    { host: '127.0.0.1:3000', 'x-forwarded-host': 'tracker.example' },
+    { host: '127.0.0.1:3000', 'x-forwarded-for': '203.0.113.1' },
+    { host: '127.0.0.1:3000', 'x-forwarded-proto': 'https' },
+    { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:9999' },
+  ]) {
+    assert.equal(canAccessTracker(new Headers(headers)), false);
+  }
+
+  process.env.VERCEL = '1';
+  assert.equal(canAccessTracker(loopback), false);
+  delete process.env.VERCEL;
+
+  process.env.NODE_ENV = 'production';
+  assert.equal(canAccessTracker(loopback), false);
+  const cookie = createSessionCookie();
+  loopback.set('cookie', `${cookie.name}=${cookie.value}`);
+  assert.equal(canAccessTracker(loopback), true);
+  assert.equal(hasLocalTrackerAccess(loopback), false);
+  assert.equal(cookie.options.secure, true);
 });
 
 test('same-origin guard compares Origin host and rejects absent or foreign origins', () => {

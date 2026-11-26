@@ -4,7 +4,7 @@
 .watch-panel .watch-heading p, .watch-panel .watch-footnote { color: var(--muted); font-size: 12px; line-height: 1.55; }
 .watch-panel .watch-heading p { margin-top: 5px; }
 .watch-add, .watch-plain, .watch-history, .watch-remove button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: var(--radius-control); border: 1px solid var(--line); padding: 9px 13px; font-size: 12px; font-weight: 600; }
-.watch-add { color: var(--panel); background: var(--accent); border-color: transparent; white-space: nowrap; }
+.watch-add { color: var(--on-accent); background: var(--accent); border-color: transparent; white-space: nowrap; }
 .watch-add:hover { filter: brightness(.94); }
 .watch-plain, .watch-history, .watch-remove button { background: var(--panel); color: var(--soft); }
 .watch-history[aria-expanded=true] svg { transform: rotate(180deg); }

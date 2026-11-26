@@ -6,7 +6,7 @@ import sandbox from '@/data/sandbox.json';
 import crypto from '@/data/crypto.json';
 import combinedHistory from '@/data/combined-history.json';
 import priceArchive from '@/data/price-history.json';
-import { requireSession } from './auth.mjs';
+import { requireTrackerAccess } from './auth.mjs';
 import { mergeAssetQuotes, mergeSnapshots, newer, newerFx, newerLedger } from './calculations';
 import { createGithubReader, mergeSteamPriceItems, normalizeSteamSnapshot, validCombinedHistory, validExtraPortfolio, validSteamLive } from './portfolio-source';
 import type { Asset, ExtraPortfolio, PortfolioData, Snapshot } from './types';
@@ -21,7 +21,7 @@ type CsSnapshot = (typeof cs2History.snapshots)[number] & {
 };
 
 export async function loadPortfolio(): Promise<PortfolioData> {
-  await requireSession();
+  await requireTrackerAccess();
   const [liveResult, sandboxResult, cryptoResult, combinedResult] = await Promise.all([
     githubFile('live.json', validSteamLive),
     githubFile('sandbox.json', (value): value is ExtraPortfolio => validExtraPortfolio(value, 'sandbox')),

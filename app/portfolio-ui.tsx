@@ -15,7 +15,7 @@ export const color = (value: number | null) => value === null || value === 0 ? '
 export const time = (at: string | null | undefined, full = false) => at && Number.isFinite(Date.parse(at)) ? new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', ...(full ? { year: 'numeric' as const } : {}), hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Astrakhan' }).format(new Date(at)) : 'Дата неизвестна';
 export const stale = (at: string | null) => !at || !Number.isFinite(Date.parse(at)) || Date.now() - Date.parse(at) > 3600000;
 export const feeText = (t: Trade) => t.feeUnknown ? '—' : t.feeType === 'PERCENT' ? `${number(t.fee, 6)}%` : t.feeQuantity !== undefined ? `${number(t.feeQuantity, 10)} ${t.feeCurrency || t.currency}` : `${number(t.fee, 8)} ${t.feeCurrency || (t.currency === 'RUB' ? '₽' : '$')}`;
-export const classNames = { cs2: 'CS2', sandbox: 'Sandbox', crypto: 'Криптовалюты' };
+export const classNames = { cs2: 'CS2', sandbox: 's&box', crypto: 'Криптовалюты' };
 export type AssetOptions = { pinned?: boolean; note?: string; target?: number };
 
 export function AssetImage({ asset }: { asset: Asset }) {

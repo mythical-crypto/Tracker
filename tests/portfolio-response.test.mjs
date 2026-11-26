@@ -58,12 +58,12 @@ test('oversized identity response fails explicitly rather than silently trimming
 test('authorization runs before loading or serializing any portfolio data', async () => {
   let loaded = 0;
   const load = async () => { loaded++; return { private: true }; };
-  const request = new Request('https://vault.invalid/api/portfolio', { headers: { 'Accept-Encoding': 'gzip' } });
+  const request = new Request('https://vault.invalid/api/portfolio', { headers: { host: 'vault.invalid', 'Accept-Encoding': 'gzip' } });
   const blocked = await authorizedPortfolioResponse(request, () => false, load);
   assert.equal(blocked.status, 401);
   assert.equal(loaded, 0);
   assert.deepEqual(await blocked.json(), { error: 'Требуется вход' });
-  const allowed = await authorizedPortfolioResponse(request, () => true, load);
+  const allowed = await authorizedPortfolioResponse(request, headers => headers.get('host') === 'vault.invalid', load);
   assert.equal(loaded, 1);
   assert.deepEqual(await allowed.json(), { private: true });
 });

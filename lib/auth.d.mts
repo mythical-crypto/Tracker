@@ -6,6 +6,8 @@ export function authenticateCredentials(username: unknown, password: unknown): P
 export function createSessionValue(nowSeconds?: number): string;
 export function verifySessionValue(value: unknown, nowSeconds?: number): boolean;
 export function isAuthenticatedCookie(cookieHeader: string | null | undefined): boolean;
+export function hasLocalTrackerAccess(headers: Pick<Headers, 'get'>): boolean;
+export function canAccessTracker(headers: Pick<Headers, 'get'>): boolean;
 export function sessionCookieOptions(): {
   httpOnly: true;
   secure: boolean;
@@ -15,7 +17,7 @@ export function sessionCookieOptions(): {
 };
 export function createSessionCookie(): { name: string; value: string; options: ReturnType<typeof sessionCookieOptions> };
 export function clearSessionCookie(): { name: string; value: string; options: ReturnType<typeof sessionCookieOptions> & { maxAge: 0; expires: Date } };
-export function requireSession(): Promise<void>;
+export function requireTrackerAccess(): Promise<void>;
 export function sameOriginRequest(request: Request): boolean;
 export function isLoginRateLimited(): boolean;
 export class RequestBodyError extends Error {

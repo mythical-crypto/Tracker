@@ -32,8 +32,8 @@ export async function portfolioJsonResponse(data: unknown, acceptEncoding: strin
   return new Response(new Uint8Array(json), { headers });
 }
 
-export async function authorizedPortfolioResponse(request: Request, authenticate: (cookie: string | null) => boolean, load: () => Promise<unknown>): Promise<Response> {
-  if (!authenticate(request.headers.get('cookie'))) {
+export async function authorizedPortfolioResponse(request: Request, canAccess: (headers: Headers) => boolean, load: () => Promise<unknown>): Promise<Response> {
+  if (!canAccess(request.headers)) {
     return Response.json({ error: 'Требуется вход' }, { status: 401, headers });
   }
   return portfolioJsonResponse(await load(), request.headers.get('accept-encoding'));
