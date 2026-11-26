@@ -4,7 +4,9 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Clock3 } from 'lucide-react';
 import { filterHistory, historyChange, periodChange, type PeriodChange } from '@/lib/calculations';
 import { chartBoundaryPoints, chartDomain, chartSegments } from '@/lib/chart-series';
+import { isSaleMedian, priceMovements, type MovementOrder } from '@/lib/price-movements';
 import type { Currency, Snapshot } from '@/lib/types';
+import { countLabel, pct, time } from './portfolio-ui';
 import './chart.css';
 
 type ChartProps = { snapshots: Snapshot[]; currency: Currency; title: string; unitPrice?: boolean; initialPeriod?: string };
@@ -20,7 +22,7 @@ const precision = (value: number, unitPrice = false) => {
   return unitPrice ? Math.min(16, Math.max(2, 3 - Math.floor(Math.log10(absolute || 1)))) : tinyDigits;
 };
 const amount = (value: number | null | undefined, currency: Currency, unitPrice = false) => value == null || !Number.isFinite(value) ? '—'
-  : new Intl.NumberFormat('ru-RU', { style: 'currency', currency, minimumFractionDigits: unitPrice ? Math.min(2, precision(value, true)) : 0, maximumFractionDigits: precision(value, unitPrice) }).format(value);
+  : new Intl.NumberFormat('ru-RU', { style: 'currency', currency, minimumFractionDigits: unitPrice ? 2 : 0, maximumFractionDigits: unitPrice && currency === 'RUB' ? 2 : precision(value, unitPrice) }).format(value);
 const signed = (value: number | null, currency: Currency, unitPrice = false) => value === null ? '—' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${amount(Math.abs(value), currency, unitPrice)}`;
 const tone = (value: number | null) => value === null || value === 0 ? '' : value > 0 ? 'hc-positive' : 'hc-negative';
 const statusText = (change: PeriodChange) => change.status === 'stale' ? 'Котировка устарела' : change.status === 'incomparable' ? 'Состав изменился' : 'Недостаточно данных';
@@ -45,16 +47,55 @@ export function PeriodSummary({ snapshots, currency, unitPrice = false }: Omit<C
   </section>;
 }
 
+function PriceJournal({ points, currency }: { points: Snapshot[]; currency: Currency }) {
+  const [order, setOrder] = useState<MovementOrder>('recent');
+  const [limit, setLimit] = useState(3);
+  const moves = useMemo(() => priceMovements(points, order), [points, order]);
+  return <section className="hc-journal" aria-label="Журнал изменений цены">
+    <div className="hc-journal-heading">
+      <h3>Изменения цены</h3>
+      <select aria-label="Порядок изменений цены" value={order} onChange={event => { setOrder(event.target.value as MovementOrder); setLimit(3); }}>
+        <option value="recent">По времени</option><option value="drops">Крупнейшие падения</option><option value="gains">Крупнейший рост</option>
+      </select>
+    </div>
+    {moves.length ? <>
+      <p className="hc-journal-hint">За единицу между соседними наблюдениями · время Астрахани</p>
+      <ol className="hc-moves">{moves.slice(0, limit).map(move => <li key={move.to.at}>
+        <div><strong>{amount(move.from.value, currency, true)} <span aria-label="до">→</span> {amount(move.to.value, currency, true)}</strong>
+          <small>{time(move.from.at, true)} → {time(move.to.at, true)}</small></div>
+        <div className={tone(move.delta)}><strong>{signed(move.delta, currency, true)}</strong>{move.percent !== null && <small>{pct(move.percent)}</small>}</div>
+      </li>)}</ol>
+      {moves.length > limit && <button className="hc-journal-more" type="button" onClick={() => setLimit(value => value + 10)}>Показать ещё · осталось {moves.length - limit}</button>}
+    </> : <p className="hc-journal-empty">{order === 'drops' ? 'Снижений' : order === 'gains' ? 'Повышений' : 'Изменений'} между сопоставимыми наблюдениями за этот период нет.</p>}
+  </section>;
+}
+
 export default function HistoryChart({ snapshots, currency, title, unitPrice = false, initialPeriod }: ChartProps) {
-  const [period, setPeriod] = useState(initialPeriod ?? (unitPrice ? 'year' : 'month'));
+  const [period, setPeriod] = useState(() => initialPeriod ?? (unitPrice ? filterHistory(snapshots, 'week').length > 1 ? 'week' : 'all' : 'month'));
   const [selected, setSelected] = useState<number | null>(null);
   const [showCost, setShowCost] = useState(false);
+  const [basis, setBasis] = useState<'spot' | 'median'>(() => snapshots.length && snapshots.every(isSaleMedian) ? 'median' : 'spot');
+  const [tableOpen, setTableOpen] = useState(false);
   const [width, setWidth] = useState(900);
   const plotRef = useRef<HTMLDivElement>(null);
   const uid = useId();
-  const data = useMemo(() => filterHistory(snapshots, period), [snapshots, period]);
+  const hasMedian = unitPrice && snapshots.some(isSaleMedian);
+  const hasSpot = unitPrice && snapshots.some(point => !isSaleMedian(point));
+  const series = useMemo(() => unitPrice ? snapshots.filter(point => isSaleMedian(point) === (basis === 'median')) : snapshots, [snapshots, unitPrice, basis]);
+  const data = useMemo(() => filterHistory(series, period), [series, period]);
+  const extremes = useMemo(() => {
+    if (!unitPrice || !data.length) return null;
+    let low = data[0], high = data[0];
+    for (const point of data) {
+      if (point.value < low.value) low = point;
+      if (point.value > high.value) high = point;
+    }
+    return { low, high };
+  }, [unitPrice, data]);
   const boundaryPoints = useMemo(() => chartBoundaryPoints(data), [data]);
-  const first = data[0], last = data.at(-1), change = historyChange(data);
+  const first = data[0], last = data.at(-1);
+  const hasBreak = unitPrice && chartSegments(data).length > 1;
+  const change = hasBreak ? null : historyChange(data);
   const hasCost = data.some(snapshot => snapshot.cost !== null && Number.isFinite(snapshot.cost));
   const visibleCost = hasCost && showCost;
   const active = selected !== null && selected < data.length ? selected : data.length - 1;
@@ -90,8 +131,9 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
 
   return <div className={`hc-chart${unitPrice ? ' hc-unit' : ''}`}>
     <div className="hc-toolbar"><h2>{title}</h2><div className="hc-periods" role="group" aria-label="Период графика">{periods.map(([id, label]) => <button key={id} type="button" aria-pressed={period === id} onClick={() => { setPeriod(id); setSelected(null); }}>{label}</button>)}</div></div>
+    {hasMedian && <div className="hc-basis">{hasSpot ? <label>Ряд цен <select value={basis} onChange={event => { setBasis(event.target.value as 'spot' | 'median'); setSelected(null); }}><option value="spot">Котировки</option><option value="median">Медиана продаж Steam</option></select></label> : 'Медиана продаж Steam'}</div>}
     {data.length > 0 && <p className="hc-coverage">Доступная история: {date(first.at)}{data.length > 1 && ` — ${date(last!.at)}`}</p>}
-    <div className="hc-headline"><strong>{amount(last?.value, currency, unitPrice)}</strong>{change !== null ? <span className={tone(change)}>{signed(change, currency, unitPrice)}<small> за доступный период</small></span> : data.length > 1 && <span className="hc-muted">Состав или покрытие менялись</span>}</div>
+    <div className="hc-headline"><strong>{amount(last?.value, currency, unitPrice)}</strong>{change !== null ? <span className={tone(change)}>{signed(change, currency, unitPrice)}<small> за доступный период</small></span> : data.length > 1 && <span className="hc-muted">{hasBreak ? 'Есть разрыв в наблюдениях' : 'Состав или покрытие менялись'}</span>}</div>
     {!unitPrice && last && <p className="hc-value-context">На последнем снимке · {date(last.at, true)}</p>}
     <div className="hc-legend"><span><i className="hc-value-swatch"/>{unitPrice ? 'Цена единицы' : 'Рыночная стоимость'}</span>{hasCost && <button type="button" aria-pressed={showCost} onClick={() => setShowCost(current => !current)}><i className="hc-cost-swatch"/>{unitPrice ? 'Средняя покупка' : 'Показать вложения'}</button>}</div>
     {data.length ? <>
@@ -122,12 +164,14 @@ export default function HistoryChart({ snapshots, currency, title, unitPrice = f
         <div className="hc-readout" aria-live="polite"><span>{date(highlighted?.at, true)}</span><strong>{amount(highlighted?.value, currency, unitPrice)}</strong>{visibleCost && highlighted?.cost != null && <small>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}: {amount(highlighted.cost, currency, unitPrice)}</small>}</div>
       </div>
       <p id={`${uid}-keyboard`} className="hc-sr-only">Выберите снимок стрелками влево и вправо. Home — первый снимок, End — последний. Все значения доступны в таблице ниже.</p>
-      {unitPrice && <div className="hc-range" aria-label="Диапазон наблюдаемых цен"><span>Минимум в периоде<strong>{amount(Math.min(...data.map(s => s.value)), currency, true)}</strong></span><span>Максимум в периоде<strong>{amount(Math.max(...data.map(s => s.value)), currency, true)}</strong></span><span>Наблюдений<strong>{data.length}</strong></span></div>}
-      <div className="hc-caption"><span>{data.length === 1 ? 'Один снимок · линия появится после следующего сопоставимого наблюдения' : `${data.length} реальных снимков`}</span>{stale && <span>Последний снимок устарел</span>}</div>
+      {extremes && <div className="hc-range" aria-label="Диапазон наблюдаемых цен">{([['Минимум', extremes.low], ['Максимум', extremes.high]] as const).map(([label, point]) => <span key={label}>{label} за период<strong>{amount(point.value, currency, true)}</strong><time dateTime={point.at}>{time(point.at, true)}</time></span>)}</div>}
+      <div className="hc-caption"><span>{data.length === 1 ? 'Один снимок · линия появится после следующего сопоставимого наблюдения' : countLabel(data.length, ['реальный снимок', 'реальных снимка', 'реальных снимков'])}</span>{stale && <span>Последний снимок устарел</span>}</div>
       {!last!.complete && <p className="hc-note">Оценена часть портфеля{last!.pricedCount != null && last!.totalCount != null ? `: ${last!.pricedCount} из ${last!.totalCount} позиций` : ''}.</p>}
       {visibleCost && last!.costComplete === false && <p className="hc-note">Себестоимость известна частично{last!.knownCostCount != null && last!.totalCount != null ? `: ${last!.knownCostCount} из ${last!.totalCount} позиций` : ''}.</p>}
-      {data.length > 1 && change === null && <details className="hc-note"><summary>Состав или покрытие оценки менялись</summary><p>Изменение несопоставимо: менялись остатки или покрытие оценки либо их состав не записан. Линия прервана между несопоставимыми снимками.</p></details>}
-      <details className="hc-data"><summary>Значения графика</summary><div className="hc-table-scroll"><table><caption className="hc-sr-only">{title}, {symbol(currency)}{unitPrice ? ' за единицу' : ''}</caption><thead><tr><th>Дата снимка</th><th>{unitPrice ? 'Цена единицы' : 'Стоимость'}</th>{hasCost && <th>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}</th>}</tr></thead><tbody>{data.map((snapshot, index) => <tr key={`${snapshot.at}-${index}`}><td>{date(snapshot.at, true)}</td><td>{amount(snapshot.value, currency, unitPrice)}{!snapshot.complete && <small>Частичная оценка{snapshot.pricedCount != null && snapshot.totalCount != null ? `: ${snapshot.pricedCount}/${snapshot.totalCount}` : ''}</small>}</td>{hasCost && <td>{amount(snapshot.cost, currency, unitPrice)}{snapshot.cost === null ? <small>Нет данных</small> : snapshot.costComplete === false && <small>Себестоимость известна частично</small>}</td>}</tr>)}</tbody></table></div></details>
+      {!unitPrice && data.length > 1 && change === null && <details className="hc-note"><summary>Состав или покрытие оценки менялись</summary><p>Изменение несопоставимо: менялись остатки или покрытие оценки либо их состав не записан. Линия прервана между несопоставимыми снимками.</p></details>}
+      <details className="hc-data" onToggle={event => setTableOpen(event.currentTarget.open)}><summary>Значения графика</summary>{tableOpen && <div className="hc-table-scroll"><table><caption className="hc-sr-only">{title}, {symbol(currency)}{unitPrice ? ' за единицу' : ''}</caption><thead><tr><th>Дата снимка</th><th>{unitPrice ? 'Цена единицы' : 'Стоимость'}</th>{hasCost && <th>{unitPrice ? 'Средняя покупка' : 'Себестоимость'}</th>}</tr></thead><tbody>{data.map((snapshot, index) => <tr key={`${snapshot.at}-${index}`}><td>{date(snapshot.at, true)}</td><td>{amount(snapshot.value, currency, unitPrice)}{!snapshot.complete && <small>Частичная оценка{snapshot.pricedCount != null && snapshot.totalCount != null ? `: ${snapshot.pricedCount}/${snapshot.totalCount}` : ''}</small>}</td>{hasCost && <td>{amount(snapshot.cost, currency, unitPrice)}{snapshot.cost === null ? <small>Нет данных</small> : snapshot.costComplete === false && <small>Себестоимость известна частично</small>}</td>}</tr>)}</tbody></table></div>}</details>
+      {unitPrice && <PriceJournal key={`${period}-${basis}`} points={data} currency={currency}/>}
     </> : <div className="hc-empty"><Clock3 size={24}/><strong>За этот период нет снимков</strong><p>{snapshots.length ? 'Выберите «Всё», чтобы увидеть доступную историю.' : 'История появится после обновления цен. Операции доступны на отдельной вкладке.'}</p></div>}
+    {unitPrice && <PeriodSummary snapshots={series} currency={currency} unitPrice/>}
   </div>;
 }

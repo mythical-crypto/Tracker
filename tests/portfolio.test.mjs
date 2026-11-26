@@ -19,6 +19,11 @@ test('история сохраняет 15-минутные наблюдения
   assert.deepEqual(retainSnapshots([...snapshots].reverse(), now), retained);
 });
 
+test('редкие внутридневные наблюдения сохраняются после длительного перерыва источника', () => {
+  const snapshots = ['2026-10-05T09:00Z', '2026-10-05T09:30Z', '2026-11-25T21:00Z'].map(at => ({ at }));
+  assert.deepEqual(retainSnapshots(snapshots, Date.parse(snapshots.at(-1).at)), snapshots);
+});
+
 test('CSV сохраняет кавычки, запятые и русские названия', () => {
   const rows = parseCsv('Name,Type,Quantity\n"Sticker | Тест, \""Gold\""",buy,2\n');
   assert.equal(rows[0].Name, 'Sticker | Тест, "Gold"');

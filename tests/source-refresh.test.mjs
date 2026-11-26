@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, readFile, unlink, rmdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { refreshPrices } from '../scripts/update-prices.mjs';
-import { refreshSandbox, updateExtras } from '../scripts/update-extras.mjs';
+import { refreshCrypto, refreshSandbox, updateExtras } from '../scripts/update-extras.mjs';
 import { buildCryptoPortfolio, fetchCryptoSource, fetchSteamPrice, rublesToKopecks } from '../scripts/extra-sources.mjs';
 import { combinedSnapshot } from '../scripts/record-total.mjs';
 import { newerLedger } from '../lib/calculations.ts';
@@ -197,6 +197,59 @@ test('DropsTab must complete transaction pagination before replacing its saved l
     return { content: [{ id: pages }], last: false };
   } }), /20 pages/);
   assert.equal(pages, 20);
+});
+
+test('restricted DropsTab shares refresh only matching USD quotes and keep the confirmed ledger and FX', async () => {
+  const portfolios = [
+    { name: 'Alpha', symbol: 'A', slug: 'alpha', currencyId: 1, quantity: 2, price: { USD: 4 }, initialCap: { USD: 6 } },
+    { name: 'Beta', symbol: 'B', slug: 'beta', currencyId: 2, quantity: 1, price: { USD: 9 } },
+  ];
+  const previous = buildCryptoPortfolio({
+    payload: { portfolios, portfolioTotal: { totalCap: { USD: 17, RUB: 1360 } } },
+    transactions: [{ id: 1, currencyId: 1, quantity: 2, priceUsd: 3, transactionType: 'BUY', fee: 0 }],
+    fetchedAt: oldAt,
+  });
+  const restricted = { portfolios: [
+    { slug: 'alpha', symbol: 'A', price: { USD: '5', RUB: '411' } },
+    { slug: 'other-beta', symbol: 'B', price: { USD: 20 } },
+    { slug: 'new', symbol: 'C', price: { USD: 2 } },
+  ] };
+  const { portfolio: result } = await refreshCrypto(previous, { now: newAt,
+    fetchSource: options => fetchCryptoSource({ ...options, fetchSource: async url => {
+      assert.ok(!String(url).includes('/transactions'));
+      return restricted;
+    } }),
+  });
+  assert.deepEqual(result.items, [{ ...previous.items[0], price: 5, updatedAt: newAt }, previous.items[1]]);
+  assert.equal(result.ledgerUpdatedAt, oldAt);
+  assert.equal(result.fxUpdatedAt, oldAt);
+  assert.equal(result.usdRub, 80);
+  assert.equal(result.fetchedAt, newAt);
+  assert.match(result.error, /остатки.*1\/2.*курс/);
+  const snapshot = result.snapshots.at(-1);
+  assert.equal(snapshot.value, 19);
+  assert.deepEqual(snapshot.quoteDates, { 'crypto-a': newAt, 'crypto-b': oldAt });
+  assert.equal(snapshot.freshCount, 1);
+});
+
+test('failed transaction pages can provide new quotes and an observed FX ratio without rewriting holdings', async () => {
+  const coin = { name: 'Coin', slug: 'coin', symbol: 'C', quantity: 2, price: { USD: 4 } };
+  const previous = buildCryptoPortfolio({ payload: { portfolios: [coin] }, transactions: [], fetchedAt: oldAt });
+  const group = { portfolios: [{ ...coin, quantity: 6, price: { USD: 5 } }], portfolioTotal: { totalCap: { USD: 30, RUB: 2490 } } };
+  const { portfolio } = await refreshCrypto(previous, { now: newAt,
+    fetchSource: options => fetchCryptoSource({ ...options, fetchSource: async url => {
+      if (String(url).includes('/transactions')) throw new Error('HTTP 403');
+      return group;
+    } }),
+  });
+  assert.equal(portfolio.items[0].quantity, 2);
+  assert.equal(portfolio.items[0].price, 5);
+  assert.equal(portfolio.snapshots.at(-1).value, 10);
+  assert.equal(portfolio.snapshots.at(-1).sourceValue, undefined);
+  assert.equal(portfolio.usdRub, 83);
+  assert.equal(portfolio.fxUpdatedAt, newAt);
+  assert.equal(portfolio.ledgerUpdatedAt, oldAt);
+  assert.match(portfolio.error, /HTTP 403/);
 });
 
 test('combined snapshots use real quote dates, convertible item values and reject duplicate failed refreshes', () => {

@@ -4,15 +4,18 @@ import { useState, type RefObject } from 'react';
 import { ArrowDownLeft, ArrowUpRight, ExternalLink, Pin, X, StickyNote, Target, CircleCheck, Info } from 'lucide-react';
 import type { Asset, Snapshot } from '@/lib/types';
 import { assetStatistics } from '@/lib/asset-statistics';
+import { convert } from '@/lib/calculations';
 import { newestTradeFirst, tradeDate, tradeSource, tradeLabel } from '@/lib/trades';
-import HistoryChart, { PeriodSummary } from './history-chart';
+import HistoryChart from './history-chart';
 import { AssetImage, type AssetOptions, classNames, money, number, countLabel, price, pct, signed, color, time, stale, feeText } from './portfolio-ui';
 
-type Props = { asset: Asset; snapshots: Snapshot[]; options: AssetOptions; share: number | null; closeRef: RefObject<HTMLButtonElement | null>; dialogRef: RefObject<HTMLElement | null>; onClose: () => void; onChange: (options: AssetOptions) => void };
+type Props = { asset: Asset; snapshots: Snapshot[]; options: AssetOptions; share: number | null; initialPeriod?: string; usdRub: number | null; fxUpdatedAt: string | null; closeRef: RefObject<HTMLButtonElement | null>; dialogRef: RefObject<HTMLElement | null>; onClose: () => void; onChange: (options: AssetOptions) => void };
 
-export default function AssetDetails({ asset, snapshots, options, share, closeRef, dialogRef, onClose, onChange }: Props) {
+export default function AssetDetails({ asset, snapshots, options, share, initialPeriod, usdRub, fxUpdatedAt, closeRef, dialogRef, onClose, onChange }: Props) {
   const [tab, setTab] = useState('overview');
   const stats = assetStatistics(asset);
+  const rubValue = asset.currency === 'USD' && usdRub !== null && usdRub > 0 && Number.isFinite(usdRub) && fxUpdatedAt && Number.isFinite(Date.parse(fxUpdatedAt))
+    ? convert(stats.value, asset.currency, usdRub) : null;
   const closed = asset.quantity === 0;
   const datedTrades = asset.trades.filter(trade => trade.date && Number.isFinite(Date.parse(trade.date))).sort(newestTradeFirst);
   const firstBuy = datedTrades.filter(trade => trade.type === 'buy' && trade.purpose !== 'AIRDROP').at(-1);
@@ -33,13 +36,13 @@ export default function AssetDetails({ asset, snapshots, options, share, closeRe
       </div>
       <div className="drawer-body">
         <section className="position-hero" aria-label="Оценка позиции">
-          <div className="position-value"><span>Стоимость позиции</span><strong>{money(stats.value, asset.currency, 2)}</strong><small>{number(asset.quantity, asset.class === 'crypto' ? 10 : 2)} {asset.symbol || 'шт.'} × {price(asset.price, asset.currency)}</small></div>
+          <div className="position-value"><span>Стоимость позиции</span><strong>{rubValue === null ? money(stats.value, asset.currency, 2) : `≈ ${money(rubValue, 'RUB', 2)}`}</strong><small>{number(asset.quantity, asset.class === 'crypto' ? 10 : 2)} {asset.symbol || 'шт.'} × {price(asset.price, asset.currency)}{rubValue !== null && ` = ${money(stats.value, 'USD', 2)}`}</small>{rubValue !== null && <small>1 $ ≈ {money(usdRub, 'RUB', 2)} · DropsTab, {time(fxUpdatedAt, true)}</small>}</div>
           <div><span>{closed ? 'Результат продаж' : 'Вложено в остаток'}</span><strong className={closed ? color(asset.realized) : ''}>{closed ? signed(asset.realized, asset.currency, 2) : money(asset.cost, asset.currency, 2)}</strong><small>{closed ? 'По исходному учёту операций' : `Средняя покупка ${price(asset.averageBuyPrice, asset.currency)}`}</small></div>
           <div><span>{closed ? 'Продано по истории' : 'Нереализованный результат'}</span><strong className={closed ? '' : color(stats.pnl)}>{closed ? stats.soldQuantity === null ? '—' : `${number(stats.soldQuantity, 10)} ${asset.symbol || 'шт.'}` : signed(stats.pnl, asset.currency, 2)}</strong><small className={closed ? '' : color(stats.pnl)}>{closed ? `Сумма продаж ${money(stats.sellTotal, asset.currency, 2)}` : stats.pnl === null ? noPnl : stats.roi === null ? 'Без затрат на покупку' : pct(stats.roi)}</small></div>
         </section>
         {tab === 'overview' && <>
           <div className="detail-overview-grid">
-            <section className="panel detail-chart"><HistoryChart key={asset.id} snapshots={snapshots} currency={asset.currency} title="Цена единицы" unitPrice/><PeriodSummary snapshots={snapshots} currency={asset.currency} unitPrice/></section>
+            <section className="panel detail-chart"><HistoryChart key={asset.id} snapshots={snapshots} currency={asset.currency} title="Цена единицы" initialPeriod={initialPeriod} unitPrice/></section>
             <section className="panel position-ledger"><div className="panel-heading"><h3>Паспорт позиции</h3><Info size={16}/></div>
               <dl>
                 <div><dt>Количество</dt><dd>{number(asset.quantity, asset.class === 'crypto' ? 10 : 2)} <small>{asset.symbol || 'шт.'}</small></dd></div>

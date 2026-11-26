@@ -5,7 +5,8 @@ export function retainSnapshots(snapshots, now = Date.now()) {
   const hourly = new Map();
   const daily = new Map();
   const weekly = new Map();
-  for (const snapshot of [...snapshots].sort((a, b) => Date.parse(a.at) - Date.parse(b.at))) {
+  const ordered = [...snapshots].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+  for (const snapshot of ordered) {
     const time = Date.parse(snapshot.at);
     if (!Number.isFinite(time)) throw new Error(`Некорректная дата снимка: ${snapshot.at}`);
     if (time >= now - 2 * day) {
@@ -20,5 +21,7 @@ export function retainSnapshots(snapshots, now = Date.now()) {
       weekly.set(date.toISOString().slice(0, 10), snapshot);
     }
   }
-  return [...weekly.values(), ...daily.values(), ...hourly.values(), ...recent].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+  // A long source outage should not collapse the last few observed price moves into one daily close.
+  const retained = new Set([...weekly.values(), ...daily.values(), ...hourly.values(), ...recent, ...ordered.slice(-24)]);
+  return [...retained].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
 }

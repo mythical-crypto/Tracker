@@ -1,0 +1,82 @@
+.page-heading .heading-action {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 40px; padding: 0 15px; border: 0; border-radius: 8px;
+  background: var(--green-800); color: white; font-weight: 600; white-space: nowrap;
+}
+.heading-action:hover { background: var(--green-600); }
+.workspace .page-heading { align-items: center; }
+.workspace .page-heading p { margin-top: 7px; }
+.workspace .metric-strip { padding: 0; gap: 0; margin: 18px 0 22px; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--panel); overflow: hidden; }
+.workspace .metric-strip > div { padding: 19px 20px; }
+.workspace .metric-strip .metric-primary { background: var(--green-950); color: #fff; }
+.workspace .metric-strip .metric-primary > span, .workspace .metric-strip .metric-primary small { color: #c1d6c9; }
+.workspace .metric-strip .metric-primary > strong { margin-top: 6px; }
+.workspace-nav { display: flex; align-items: center; gap: 19px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin: 0 0 18px; }
+.workspace-nav button { display: inline-flex; align-items: center; gap: 7px; padding: 0 2px 10px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; color: var(--muted); font-weight: 550; }
+.workspace-nav button[aria-pressed=true] { border-bottom-color: var(--accent); color: var(--accent); }
+.workspace-nav button:hover { color: var(--ink); }
+.market-panel { margin: 0 0 20px; padding: 20px 22px 0; }
+.market-head,.market-subhead,.movement-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.market-head h2 { font-size: 20px; letter-spacing: -.6px; }
+.market-head p,.market-subhead > span,.movement-foot { font-size: 11px; color: var(--muted); }
+.market-head p { margin-top: 4px; }
+.market-periods { display: flex; gap: 2px; background: var(--panel-soft); border: 1px solid var(--line); padding: 3px; border-radius: 8px; }
+.market-periods button { border: 0; background: transparent; color: var(--soft); padding: 7px 10px; border-radius: 5px; font-size: 11px; }
+.market-periods button[aria-pressed=true] { color: var(--ink); background: var(--panel); box-shadow: 0 1px 3px #10201828; font-weight: 650; }
+.market-subhead { margin-top: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.movement-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.movement-tabs button { display: inline-flex; align-items: center; gap: 5px; border: 1px solid transparent; padding: 6px 8px; border-radius: 6px; color: var(--soft); background: transparent; font-size: 12px; }
+.movement-tabs button b { font-size: 10px; font-weight: 600; }
+.movement-tabs button[aria-pressed=true] { background: var(--panel-soft); border-color: var(--line); color: var(--ink); }
+.movement-tabs button[data-band=down][aria-pressed=true] { color: var(--negative); background: var(--negative-soft); }
+.movement-tabs button[data-band=up][aria-pressed=true] { color: var(--positive); background: var(--accent-soft); }
+.movement-labels,.movement-row { display: grid; grid-template-columns: minmax(140px,1.8fr) repeat(2,minmax(110px,1fr)) minmax(80px,.65fr) 16px; align-items: center; gap: 12px; width: 100%; }
+.movement-labels { padding: 10px 4px 5px; color: var(--muted); font-size: 10px; text-align: right; }
+.movement-labels span:first-child { text-align: left; }
+.movement-row { padding: 10px 4px; min-height: 53px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; text-align: right; }
+.movement-row:hover { background: var(--panel-soft); }
+.movement-asset { display: flex; align-items: center; gap: 10px; text-align: left; min-width: 0; }
+.movement-asset > span:last-child { min-width: 0; }
+.movement-asset .asset-image { width: 35px; height: 35px; }
+.movement-asset strong,.movement-row small,.movement-quote b,.movement-delta strong { display: block; }
+.movement-asset strong { overflow-wrap: anywhere; }
+.movement-row small { margin-top: 3px; font-size: 10px; color: var(--muted); line-height: 1.35; }
+.movement-quote b,.movement-asset strong { font-size: 13px; font-weight: 600; }
+.movement-delta strong { font-size: 14px; }
+.movement-delta small { color: inherit; }
+.movement-chevron { justify-self: end; color: var(--muted); }
+.movement-foot { padding: 11px 0; font-size: 10px; line-height: 1.5; }
+.movement-foot button { color: var(--accent); background: transparent; border: 0; padding: 5px; white-space: nowrap; font-weight: 600; }
+.market-panel .movement-empty { padding: 24px 0; color: var(--soft); }
+.assets-panel .list-heading { padding: 18px 20px 0; display: flex; align-items: center; gap: 10px; }
+.list-heading > span { color: var(--muted); }
+.workspace .source-status { margin-bottom: 12px; }
+@media (max-width: 760px) {
+  .workspace .metric-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .workspace .metric-strip > div { padding: 14px; }
+  .workspace .metric-strip > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .workspace .metric-strip > div:nth-child(3) { border-left: 0; }
+  .workspace-nav { gap: 14px; }
+  .workspace-nav button { font-size: 12px; }
+  .workspace-nav button svg { display: none; }
+  .market-panel { padding: 15px 13px 0; }
+  .market-head { align-items: flex-start; flex-wrap: wrap; }
+  .market-subhead { margin-top: 10px; }
+  .movement-labels { display: none; }
+  .movement-row { grid-template-columns: 1fr 1fr auto; gap: 7px; padding: 12px 0; text-align: left; }
+  .movement-asset { grid-column: 1 / 3; grid-row: 1; }
+  .movement-quote { grid-row: 2; }
+  .movement-quote::before { display: inline; font-size: 10px; color: var(--muted); padding-right: 4px; }
+  .movement-quote:nth-child(2)::before { content: 'Было'; }
+  .movement-quote:nth-child(3)::before { content: 'Стало'; }
+  .movement-quote b { display: inline; font-size: 12px; }
+  .movement-delta { grid-column: 3; grid-row: 1; text-align: right; }
+  .movement-chevron { grid-column: 3; grid-row: 2; }
+  .movement-foot { align-items: flex-start; }
+}
+@media (max-width: 460px) {
+  .workspace .page-heading { gap: 10px; flex-wrap: wrap; }
+  .workspace-nav { gap: 11px; }
+  .movement-tabs { gap: 0; }
+  .movement-tabs button { padding: 6px; }
+}

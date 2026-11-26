@@ -256,6 +256,25 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
       trades,
     };
   });
+  return finishCryptoPortfolio({ group, items, freshIds, previous, fetchedAt });
+}
+
+// Portfolio visibility and market prices are independent on the public share.
+export function updateCryptoQuotes({ group, previous, fetchedAt, ledgerError }) {
+  if (!Array.isArray(previous?.items)) throw new Error('Нет сохранённого учёта DropsTab');
+  const byUrl = new Map(group.portfolios.map(coin => [`https://dropstab.com/coins/${coin.slug}`, coin]));
+  const freshIds = new Set();
+  const items = previous.items.map(item => {
+    const coin = byUrl.get(item.marketUrl);
+    const price = number(coin?.price?.USD);
+    if (!coin || coin.symbol !== item.symbol || price === null || price < 0) return item;
+    if (item.quantity > 0) freshIds.add(item.id);
+    return { ...item, price, updatedAt: fetchedAt };
+  });
+  return finishCryptoPortfolio({ group, items, freshIds, previous, fetchedAt, ledgerError });
+}
+
+function finishCryptoPortfolio({ group, items, freshIds, previous, fetchedAt, ledgerError }) {
   const previousSnapshots = previous?.snapshots ?? [];
   const totalValue = number(group.portfolioTotal?.totalCap?.USD);
   const totalCost = number(group.portfolioTotal?.initialCap?.USD);
@@ -286,9 +305,9 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
     snapshots.push({
       at: fetchedAt,
       value: observedValue,
-      ...(totalValue !== null && Math.abs(totalValue - observedValue) > 1e-8 ? { sourceValue: totalValue } : {}),
+      ...(!ledgerError && totalValue !== null && Math.abs(totalValue - observedValue) > 1e-8 ? { sourceValue: totalValue } : {}),
       ...costSummary,
-      ...(totalCost !== null && totalCost !== costSummary.cost ? { sourceCost: totalCost } : {}),
+      ...(!ledgerError && totalCost !== null && totalCost !== costSummary.cost ? { sourceCost: totalCost } : {}),
       complete,
       pricedCount: priced.length,
       totalCount: held.length,
@@ -306,10 +325,15 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
   const totalRub = number(group.portfolioTotal?.totalCap?.RUB);
   const sourceFx = totalValue > 0 && totalRub > 0 ? totalRub / totalValue : null;
   const usdRub = Number.isFinite(sourceFx) && sourceFx > 0 ? sourceFx : null;
+  const errors = [
+    ledgerError,
+    freshCount < held.length ? `Обновлены котировки ${freshCount}/${held.length}.` : '',
+    ledgerError && !usdRub ? 'Новый курс оценки USD/RUB недоступен.' : '',
+  ].filter(Boolean);
   return {
     source: 'DropsTab',
     fetchedAt: freshCount ? fetchedAt : (previous?.fetchedAt ?? null),
-    ledgerUpdatedAt: fetchedAt,
+    ledgerUpdatedAt: ledgerError ? previous.ledgerUpdatedAt ?? previous.fetchedAt : fetchedAt,
     freshCount,
     totalCount: held.length,
     sourceUrl: DROPSTAB_PUBLIC_URL,
@@ -320,7 +344,7 @@ export function buildCryptoPortfolio({ payload, transactions = null, previous, f
       'Данные USD/RUB — отношение оценок портфеля DropsTab в RUB и USD, не отдельный курс валютного провайдера.',
     ],
     ...(usdRub ? { usdRub, fxUpdatedAt: fetchedAt, fxSource: 'DropsTab portfolio valuation ratio (RUB/USD)' } : (previous?.usdRub ? { usdRub: previous.usdRub, fxUpdatedAt: previous.fxUpdatedAt, fxSource: previous.fxSource } : {})),
-    ...(freshCount < held.length ? { error: `DropsTab: обновлены котировки ${freshCount}/${held.length}; сохранённые цены сохраняют исходные даты.` } : {}),
+    ...(errors.length ? { error: `DropsTab: ${errors.join(' ')}` } : {}),
   };
 }
 
@@ -348,9 +372,22 @@ export async function fetchJson(url, { timeoutMs = 20000, headers = {} } = {}) {
   return response.json();
 }
 
-export async function fetchCryptoSource({ fetchSource = fetchJson } = {}) {
+export async function fetchCryptoSource({ fetchSource = fetchJson, allowQuoteOnly = false } = {}) {
   const group = await fetchSource(SOURCE_URLS.crypto);
   const result = unwrapPortfolio(group);
+  if (allowQuoteOnly && (result.portfolios.some(p => (number(p.quantity) ?? number(p.accurateQuantity) ?? -1) < 0)
+      || (!result.portfolios.length && number(result.portfolioTotal?.totalCap?.USD) !== 0))) {
+    return { group: result, ledgerError: 'Публичный портфель не раскрыл остатки. Сохранены прежние количества и операции.' };
+  }
+  try {
+    return { group: result, transactions: await fetchCryptoTransactions(result, fetchSource) };
+  } catch (error) {
+    if (!allowQuoteOnly) throw error;
+    return { group: result, ledgerError: `История операций недоступна (${error.message}). Сохранены прежние количества и операции.` };
+  }
+}
+
+async function fetchCryptoTransactions(group, fetchSource) {
   const rows = [];
   let total = null;
   let completed = false;
@@ -365,8 +402,7 @@ export async function fetchCryptoSource({ fetchSource = fetchJson } = {}) {
   }
   if (!completed) throw new Error('DropsTab transaction pagination exceeded 20 pages; previous transactions must be preserved');
   if (total !== null && rows.length < total) throw new Error(`DropsTab returned ${rows.length}/${total} transactions`);
-  if (rows.length === 0) return { group: result, transactions: cryptoTransactionsFromGroup(result) };
-  return { group: result, transactions: rows };
+  return rows.length ? rows : cryptoTransactionsFromGroup(group);
 }
 
 export async function fetchSteamPrice(name, { appid = '590830', fetchSource = fetchJson } = {}) {

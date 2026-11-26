@@ -1,7 +1,7 @@
 import { readFile, writeFile, rename } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { buildCryptoPortfolio, buildSandboxPortfolio, delay, fetchCryptoSource, fetchSteamPrice, transientSourceFailure } from './extra-sources.mjs';
+import { buildCryptoPortfolio, buildSandboxPortfolio, delay, fetchCryptoSource, fetchSteamPrice, transientSourceFailure, updateCryptoQuotes } from './extra-sources.mjs';
 
 const paths = { sandbox: resolve('data/sandbox.json'), crypto: resolve('data/crypto.json') };
 
@@ -51,11 +51,13 @@ export async function refreshSandbox(previous, { now = null, fetchPrice = fetchS
 }
 
 export async function refreshCrypto(previous, { now = null, fetchSource = fetchCryptoSource, clock = () => now ?? new Date().toISOString() } = {}) {
-  const { group, transactions } = await fetchSource();
+  const { group, transactions, ledgerError } = await fetchSource({ allowQuoteOnly: true });
   const completedAt = clock();
-  const portfolio = buildCryptoPortfolio({ payload: group, transactions, previous, fetchedAt: completedAt });
+  const portfolio = ledgerError
+    ? updateCryptoQuotes({ group, previous, fetchedAt: completedAt, ledgerError })
+    : buildCryptoPortfolio({ payload: group, transactions, previous, fetchedAt: completedAt });
   portfolio.attemptedAt = completedAt;
-  return { portfolio, transactionCount: transactions.length };
+  return { portfolio, transactionCount: portfolio.items.reduce((sum, item) => sum + item.trades.length, 0) };
 }
 
 export async function updateExtras({ sandboxPath = paths.sandbox, cryptoPath = paths.crypto, now = null, logger = console, sandboxRefresh = refreshSandbox, cryptoRefresh = refreshCrypto } = {}) {
@@ -82,6 +84,7 @@ export async function updateExtras({ sandboxPath = paths.sandbox, cryptoPath = p
     await writeJson(cryptoPath, crypto.portfolio);
     if (crypto.portfolio.freshCount > 0) successes++;
     logger.log(`DropsTab Crypto: ${crypto.transactionCount} сделок, ${crypto.portfolio.items.filter((item) => item.quantity > 0).length} открытых позиций`);
+    if (crypto.portfolio.error) logger.error(crypto.portfolio.error);
   } catch (error) {
     await writeJson(cryptoPath, { ...previousCrypto, freshCount: 0, attemptedAt: now ?? new Date().toISOString(), error: `DropsTab refresh failed: ${error.message}`, notes: [...previousCrypto.notes.filter(note => !note.startsWith('Последнее обновление DropsTab завершилось ошибкой')), `Последнее обновление DropsTab завершилось ошибкой; сохранены данные от ${previousCrypto.fetchedAt ?? 'неизвестной даты'}.`] });
     logger.error(`DropsTab Crypto: ${error.message}`);

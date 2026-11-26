@@ -9,6 +9,7 @@ export const number = (value: number, digits = 2) => new Intl.NumberFormat('ru-R
 export const countLabel = (value: number, forms: [string, string, string]) => `${value} ${forms[value % 100 >= 11 && value % 100 <= 14 ? 2 : value % 10 === 1 ? 0 : value % 10 >= 2 && value % 10 <= 4 ? 1 : 2]}`;
 export const price = (value: number | null, currency: Currency) => value === null ? '—' : new Intl.NumberFormat('ru-RU', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: currency === 'USD' ? Math.min(16, Math.max(4, 3 - Math.floor(Math.log10(Math.abs(value) || 1)))) : 2 }).format(value);
 export const pct = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : ''}${number(value, 2)}%`;
+export const rubPrice = (value: number | null) => value === null ? '—' : money(value, 'RUB', value > 0 && value < 0.01 ? Math.min(12, 2 - Math.floor(Math.log10(value))) : 2);
 export const signed = (value: number | null, currency: Currency = 'RUB', digits = 0) => value === null ? '—' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${money(Math.abs(value), currency, digits)}`;
 export const color = (value: number | null) => value === null || value === 0 ? '' : value > 0 ? 'positive' : 'negative';
 export const time = (at: string | null | undefined, full = false) => at && Number.isFinite(Date.parse(at)) ? new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', ...(full ? { year: 'numeric' as const } : {}), hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Astrakhan' }).format(new Date(at)) : 'Дата неизвестна';
